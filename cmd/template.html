@@ -100,8 +100,8 @@ function build(init) {
         for (var j = 0; j < cells.length; j++) {
             var cell = cells[j];
             var parts = cell.split(split_char);
-            var x = expand_range(parts[0]);
-            var y = expand_range(parts[1]);
+            var x = expand_range(parts[1]);
+            var y = expand_range(parts[0]);
             var range_x = [];
             var range_y = [];
             for (var k = 0; k < x.length; k++) {
