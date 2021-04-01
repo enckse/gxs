@@ -28,11 +28,12 @@ type (
 		Value string
 	}
 	Pattern struct {
-		Size    int
-		Pad     string
-		PadChar string
-		Cells   []Cell
-		JSON    template.JS
+		Size        int
+		Pad         string
+		PadChar     string
+		Interactive bool
+		Cells       []Cell
+		JSON        template.JS
 	}
 )
 
@@ -89,12 +90,18 @@ func main() {
 	size := flag.Int("size", 25, "pattern size")
 	pad := flag.Int("pad", 4, "id padding (with 0s)")
 	char := flag.String("padchar", "x", "padding character")
-	bind := flag.String("bind", ":10987", "local binding to use for server")
-	file := flag.String("file", "", "file to take as a base pattern (-- stdin)")
+	bind := flag.String("bind", "", "local binding to use for server")
+	file := flag.String("input", "", "file to take as an input pattern (-- stdin)")
 	flag.Parse()
 	fileName := *file
 	b := []byte("[]")
-	if len(fileName) > 0 {
+	binding := *bind
+	isCommandLine := binding == ""
+	if len(fileName) == 0 {
+		if isCommandLine {
+			die("no input pattern and non-interactive editing", fmt.Errorf("bad configuration"))
+		}
+	} else {
 		if fileName == "--" {
 			b = stdin()
 		} else {
@@ -124,13 +131,19 @@ func main() {
 	if obj.Size <= 0 {
 		die("invalid size", fmt.Errorf("< 0"))
 	}
+	obj.Interactive = false
+	if isCommandLine {
+		if err := tmpl.Execute(os.Stdout, obj); err != nil {
+			die("unable to execute template", err)
+		}
+		return
+	}
+	obj.Interactive = true
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		err := tmpl.Execute(w, obj)
-		if err != nil {
+		if err := tmpl.Execute(w, obj); err != nil {
 			fmt.Printf("failed to execute template: %v\n", err)
 		}
 	})
-	binding := *bind
 	fmt.Println(binding)
 	if err := http.ListenAndServe(binding, nil); err != nil {
 		die("unable to bind", err)

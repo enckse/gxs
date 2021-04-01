@@ -160,8 +160,10 @@ function update() {
     </head>
     <body>
         <div class="sidenav">
+            {{ if .Interactive }}
             <textarea id="pattern" rows=40 cols=30>{{ .JSON }}</textarea>
             <button onclick="update();">Update</button>
+            {{ end }}
         </div>
         <div class="main">
   <div class="container">

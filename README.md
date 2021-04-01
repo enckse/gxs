@@ -14,19 +14,19 @@ make
 
 run
 ```
-./bin/gxs
+./bin/gxs --bind ":10987"
 ```
 
 open the bound address (e.g. http://localhost:10987) in the browser and begin editing the JSON
 
 ## cli design
 
-edit a file and use `gxs` to show the results
+edit a file and use `gxs` to output the results
 
 ```
-cat design.json | ./bin/gxs --file --
+cat design.json | ./bin/gxs --input --
 # or
-./bin/gxs --file design.json
+./bin/gxs --input design.json
 ```
 
 ### advanced
