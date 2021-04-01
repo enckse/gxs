@@ -96,7 +96,7 @@ func main() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		err := template.Execute(w, obj)
 		if err != nil {
-			fmt.Println(fmt.Sprintf("failed to execute template: %v", err))
+			fmt.Printf("failed to execute template: %v\n", err)
 		}
     })
 	binding := *bind
