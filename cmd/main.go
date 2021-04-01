@@ -20,11 +20,15 @@ func die(message string, err error) {
 }
 
 type (
+	Cell struct {
+		ID string
+		Value string
+	}
 	Pattern struct {
 		Size int
 		Pad string
 		PadChar string
-		Cells []string
+		Cells []Cell
 	}
 )
 
@@ -36,28 +40,32 @@ func (o Pattern) pad(val int) string {
 	return padded
 }
 
-func (o Pattern) initCells() []string {
-	square := 2
-	var results []string
-	for square > 0 {
+func (o Pattern) initCells() []Cell {
+	var results []Cell
 		x := 0
 		for x < o.Size {
 			y := 0
 			for y < o.Size {
 				left := o.pad(x)
 				right := o.pad(y)
-				if square == 1 {
-					hold := left
-					left = right
-					right = hold
-				}
-				results = append(results, fmt.Sprintf("%s%s%s", left, o.PadChar, right))
+				val := ""
+					if x == 0 {
+						val = fmt.Sprintf("%d", y)
+					}
+					if y == 0 {
+						val = fmt.Sprintf("%d", x)
+					}
+					if x == 0 && y == 0 {
+						val = ""
+					}
+				cell := Cell{}
+				cell.ID = fmt.Sprintf("%s%s%s", left, o.PadChar, right)
+				cell.Value = val
+				results = append(results, cell)
 				y += 1
 			}
 			x += 1
 		}
-		square -= 1
-	}
 	return results
 }
 

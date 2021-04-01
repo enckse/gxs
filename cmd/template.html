@@ -108,13 +108,13 @@ function update() {
     </head>
     <body>
         <div class="sidenav">
-            <textarea id="pattern" rows=30 cols=30>[]</textarea>
+            <textarea id="pattern" rows=40 cols=30>[]</textarea>
             <button onclick="update();">Update</button>
         </div>
         <div class="main">
   <div class="container">
   <div class="grid" id="grid">{{ range $idx, $id := .Cells }}
-<div class="cell" id="{{ $id }}"></div>{{ end }}
+      <div class="cell" id="{{ $id.ID }}">{{ $id.Value }}</div>{{ end }}
   </div>
 </div>
         </div>
