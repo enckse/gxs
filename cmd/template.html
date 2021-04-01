@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+.container {
+  background: white;
+  display: inline-block;
+  border: 1px dotted black;
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat({{ .Size }}, 10px);
+  grid-template-rows: repeat({{ .Size }}, 10px);
+  grid-gap: 1px;
+}
+.cell {
+  justify-content: center;
+  align-items: center;
+  display: flex;
+  font-family: Arial;
+  font-size: 4pt;
+  font-weight: bold;
+  background: white;
+}
+.sidenav {
+  height: 100%;
+  width: 250px;
+  position: fixed; 
+  z-index: 1;
+  top: 0;
+  left: 0;
+  overflow-x: hidden;
+  padding-top: 20px;
+  padding-left: 10px;
+}
+textarea {
+  resize: none;
+}
+.main {
+  margin-left: 260px;
+  padding: 0px 10px;
+}
+</style>
+<script>
+
+function make_grid_id(x, y) {
+    return ("{{ .Pad }}" + x).slice(-4) + "x" + ("{{ .Pad }}" + y).slice(-4);
+}
+
+function pad_grid(x, y, cur, elements) {
+    var additions = cur;
+    for (var i = 0; i < x; i++) {
+        for (var j = 0; j < y; j++) {
+            var padded = make_grid_id(i, j);
+            if (!cur.includes(padded)) {
+                var element = new_grid(padded);
+                if (i == 0) {
+                    element.innerHTML = j;
+                }
+                if (j == 0) {
+                    element.innerHTML = i;
+                }
+                if (i == 0 && j == 0) {
+                    element.innerHTML = "";
+                }
+                elements[padded] = element;
+                additions.push(padded);
+            }
+        }
+    }
+    return additions
+}
+
+function new_grid(id) {
+    var element = document.createElement("div");
+    element.setAttribute("class", "cell");
+    element.setAttribute("id", id);
+    return element;
+}
+
+function build() {
+    var field = document.getElementById("pattern");
+    var obj = JSON.parse(field.value);
+    var width = {{ .Size }};
+    var height = {{ .Size }};
+    var grid = document.getElementById("grid");
+    grid.innerHTML = "";
+    var elements = {};
+    var keys = [];
+    for (var i = 0; i < obj.length; i++) {
+        var entry = obj[i];
+        var color = entry["color"];
+        var mode = entry["mode"];
+        var cells = entry["cells"];
+        for (var j = 0; j < cells.length; j++) {
+            var cell = cells[j];
+            var parts = cell.split("x");
+            var raw_x = parts[0];
+            var raw_y = parts[1];
+            var x = parseInt(raw_x);
+            var y = parseInt(raw_y);
+            if (x <= 0 || y <= 0) {
+                throw "found <= 0 cell (must be > 0): " + cell;
+            }
+            if (x >= width || y >= height) {
+                throw "found cell outside height/width: " + cell;
+            }
+            var pad = make_grid_id(raw_x, raw_y);
+            var element = new_grid(pad);
+            var style = "";
+            if (pad in elements) {
+                element = elements[pad];
+                style = element.getAttribute("style");
+            }
+            if (mode === "te") {
+                style += " border-top-style: solid; border-top-color: ";
+            } else if (mode == "be") {
+                style += " border-bottom-style: solid; border-bottom-color: ";
+            } else if (mode == "re") {
+                style += " border-right-style: solid; border-right-color: ";
+            } else if (mode == "le") {
+                style += " border-left-style: solid; border-left-color: ";
+            } else if (mode == "xs") {
+                style += " background-color: ";
+            } else {
+                throw "unknown mode";
+            }
+            style += color + ";";
+            element.setAttribute("style", style);
+            keys.push(pad);
+            elements[pad] = element;
+        }
+    }
+    keys = pad_grid(width, height, keys, elements);
+    keys = pad_grid(height, width, keys, elements);
+    keys.sort();
+    for (k in keys) {
+        var id = keys[k];
+        grid.appendChild(elements[id]);
+    }
+}
+function update() {
+    try {
+        build();
+    } catch (error) {
+        alert(error);
+    }
+}
+</script>
+    </head>
+    <body>
+        <div class="sidenav">
+            <textarea id="pattern" rows=30 cols=30>[]</textarea>
+            <button onclick="update();">Update</button>
+        </div>
+        <div class="main">
+  <div class="container">
+  <div class="grid" id="grid">
+  </div>
+</div>
+        </div>
+    </body>
+</html>
