@@ -23,12 +23,48 @@ type (
 	Pattern struct {
 		Size int
 		Pad string
+		PadChar string
+		Cells []string
 	}
 )
+
+func (o Pattern) pad(val int) string {
+	padded := fmt.Sprintf("%s%d", o.Pad, val)
+	for len(padded) > len(o.Pad) {
+		padded = padded[1:]
+	}
+	return padded
+}
+
+func (o Pattern) initCells() []string {
+	square := 2
+	var results []string
+	for square > 0 {
+		x := 0
+		for x < o.Size {
+			y := 0
+			for y < o.Size {
+				left := o.pad(x)
+				right := o.pad(y)
+				if square == 1 {
+					hold := left
+					left = right
+					right = hold
+				}
+				results = append(results, fmt.Sprintf("%s%s%s", left, o.PadChar, right))
+				y += 1
+			}
+			x += 1
+		}
+		square -= 1
+	}
+	return results
+}
 
 func main() {
 	size := flag.Int("size", 25, "pattern size")
 	pad := flag.Int("pad", 4, "id padding (with 0s)")
+	char := flag.String("padchar", "x", "padding character")
 	bind := flag.String("bind", ":10987", "local binding to use for server")
 	flag.Parse()
 	template, err := template.New("t").Parse(templateHTML)
@@ -44,7 +80,8 @@ func main() {
 		padString = fmt.Sprintf("0%s", padString)
 		padding = padding - 1
 	}
-	obj := Pattern{Size: *size + 1, Pad: padString}
+	obj := Pattern{Size: *size + 1, Pad: padString, PadChar: *char}
+	obj.Cells = obj.initCells()
 	if obj.Size <= 0 {
 		die("invalid size", fmt.Errorf("< 0"))
 	}

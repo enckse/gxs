@@ -45,38 +45,7 @@ textarea {
 <script>
 
 function make_grid_id(x, y) {
-    return ("{{ .Pad }}" + x).slice(-4) + "x" + ("{{ .Pad }}" + y).slice(-4);
-}
-
-function pad_grid(x, y, cur, elements) {
-    var additions = cur;
-    for (var i = 0; i < x; i++) {
-        for (var j = 0; j < y; j++) {
-            var padded = make_grid_id(i, j);
-            if (!cur.includes(padded)) {
-                var element = new_grid(padded);
-                if (i == 0) {
-                    element.innerHTML = j;
-                }
-                if (j == 0) {
-                    element.innerHTML = i;
-                }
-                if (i == 0 && j == 0) {
-                    element.innerHTML = "";
-                }
-                elements[padded] = element;
-                additions.push(padded);
-            }
-        }
-    }
-    return additions
-}
-
-function new_grid(id) {
-    var element = document.createElement("div");
-    element.setAttribute("class", "cell");
-    element.setAttribute("id", id);
-    return element;
+    return ("{{ .Pad }}" + x).slice(-4) + "{{ .PadChar }}" + ("{{ .Pad }}" + y).slice(-4);
 }
 
 function build() {
@@ -84,10 +53,7 @@ function build() {
     var obj = JSON.parse(field.value);
     var width = {{ .Size }};
     var height = {{ .Size }};
-    var grid = document.getElementById("grid");
-    grid.innerHTML = "";
-    var elements = {};
-    var keys = [];
+    var history = {};
     for (var i = 0; i < obj.length; i++) {
         var entry = obj[i];
         var color = entry["color"];
@@ -107,11 +73,10 @@ function build() {
                 throw "found cell outside height/width: " + cell;
             }
             var pad = make_grid_id(raw_x, raw_y);
-            var element = new_grid(pad);
+            var element = document.getElementById(pad);
             var style = "";
-            if (pad in elements) {
-                element = elements[pad];
-                style = element.getAttribute("style");
+            if (pad in history) {
+                style = history[pad];
             }
             if (mode === "te") {
                 style += " border-top-style: solid; border-top-color: ";
@@ -128,16 +93,8 @@ function build() {
             }
             style += color + ";";
             element.setAttribute("style", style);
-            keys.push(pad);
-            elements[pad] = element;
+            history[pad] = style;
         }
-    }
-    keys = pad_grid(width, height, keys, elements);
-    keys = pad_grid(height, width, keys, elements);
-    keys.sort();
-    for (k in keys) {
-        var id = keys[k];
-        grid.appendChild(elements[id]);
     }
 }
 function update() {
@@ -156,7 +113,8 @@ function update() {
         </div>
         <div class="main">
   <div class="container">
-  <div class="grid" id="grid">
+  <div class="grid" id="grid">{{ range $idx, $id := .Cells }}
+<div class="cell" id="{{ $id }}"></div>{{ end }}
   </div>
 </div>
         </div>
