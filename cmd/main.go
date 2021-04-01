@@ -1,11 +1,14 @@
 package main
 
 import (
-	"fmt"
-	"flag"
-	"net/http"
-	"html/template"
+	"bufio"
+	"bytes"
 	_ "embed"
+	"flag"
+	"fmt"
+	"html/template"
+	"net/http"
+	"os"
 )
 
 var (
@@ -21,14 +24,15 @@ func die(message string, err error) {
 
 type (
 	Cell struct {
-		ID string
+		ID    string
 		Value string
 	}
 	Pattern struct {
-		Size int
-		Pad string
+		Size    int
+		Pad     string
 		PadChar string
-		Cells []Cell
+		Cells   []Cell
+		JSON    template.JS
 	}
 )
 
@@ -42,31 +46,43 @@ func (o Pattern) pad(val int) string {
 
 func (o Pattern) initCells() []Cell {
 	var results []Cell
-		x := 0
-		for x < o.Size {
-			y := 0
-			for y < o.Size {
-				left := o.pad(x)
-				right := o.pad(y)
-				val := ""
-					if x == 0 {
-						val = fmt.Sprintf("%d", y)
-					}
-					if y == 0 {
-						val = fmt.Sprintf("%d", x)
-					}
-					if x == 0 && y == 0 {
-						val = ""
-					}
-				cell := Cell{}
-				cell.ID = fmt.Sprintf("%s%s%s", left, o.PadChar, right)
-				cell.Value = val
-				results = append(results, cell)
-				y += 1
+	x := 0
+	for x < o.Size {
+		y := 0
+		for y < o.Size {
+			left := o.pad(x)
+			right := o.pad(y)
+			val := ""
+			if x == 0 {
+				val = fmt.Sprintf("%d", y)
 			}
-			x += 1
+			if y == 0 {
+				val = fmt.Sprintf("%d", x)
+			}
+			if x == 0 && y == 0 {
+				val = ""
+			}
+			cell := Cell{}
+			cell.ID = fmt.Sprintf("%s%s%s", left, o.PadChar, right)
+			cell.Value = val
+			results = append(results, cell)
+			y += 1
 		}
+		x += 1
+	}
 	return results
+}
+
+func stdin() []byte {
+	scanner := bufio.NewScanner(os.Stdin)
+	var b bytes.Buffer
+	for scanner.Scan() {
+		b.WriteString(scanner.Text())
+	}
+	if err := scanner.Err(); err != nil {
+		die("failed to read stdin", err)
+	}
+	return b.Bytes()
 }
 
 func main() {
@@ -74,8 +90,22 @@ func main() {
 	pad := flag.Int("pad", 4, "id padding (with 0s)")
 	char := flag.String("padchar", "x", "padding character")
 	bind := flag.String("bind", ":10987", "local binding to use for server")
+	file := flag.String("file", "", "file to take as a base pattern (-- stdin)")
 	flag.Parse()
-	template, err := template.New("t").Parse(templateHTML)
+	fileName := *file
+	b := []byte("[]")
+	if len(fileName) > 0 {
+		if fileName == "--" {
+			b = stdin()
+		} else {
+			raw, err := os.ReadFile(fileName)
+			if err != nil {
+				die("unable to read file", err)
+			}
+			b = raw
+		}
+	}
+	tmpl, err := template.New("t").Parse(templateHTML)
 	if err != nil {
 		die("unable to parse template", err)
 	}
@@ -90,15 +120,16 @@ func main() {
 	}
 	obj := Pattern{Size: *size + 1, Pad: padString, PadChar: *char}
 	obj.Cells = obj.initCells()
+	obj.JSON = template.JS(string(b))
 	if obj.Size <= 0 {
 		die("invalid size", fmt.Errorf("< 0"))
 	}
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		err := template.Execute(w, obj)
+		err := tmpl.Execute(w, obj)
 		if err != nil {
 			fmt.Printf("failed to execute template: %v\n", err)
 		}
-    })
+	})
 	binding := *bind
 	fmt.Println(binding)
 	if err := http.ListenAndServe(binding, nil); err != nil {

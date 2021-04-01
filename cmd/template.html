@@ -48,9 +48,21 @@ function make_grid_id(x, y) {
     return ("{{ .Pad }}" + x).slice(-4) + "{{ .PadChar }}" + ("{{ .Pad }}" + y).slice(-4);
 }
 
-function build() {
+document.onreadystatechange = function () {
+    if (document.readyState == "complete") {
+            build(true);
+    }
+}
+
+function build(init) {
     var field = document.getElementById("pattern");
-    var obj = JSON.parse(field.value);
+    var data = [];
+    if (init) {
+        data = {{ .JSON }};
+    } else {
+        data = JSON.parse(field.value);
+    }
+    var obj = data;
     var width = {{ .Size }};
     var height = {{ .Size }};
     var history = {};
@@ -99,7 +111,7 @@ function build() {
 }
 function update() {
     try {
-        build();
+        build(false);
     } catch (error) {
         alert(error);
     }
@@ -108,7 +120,7 @@ function update() {
     </head>
     <body>
         <div class="sidenav">
-            <textarea id="pattern" rows=40 cols=30>[]</textarea>
+            <textarea id="pattern" rows=40 cols=30>{{ .JSON }}</textarea>
             <button onclick="update();">Update</button>
         </div>
         <div class="main">
