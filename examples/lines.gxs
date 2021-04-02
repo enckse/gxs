@@ -23,7 +23,7 @@ mode => {
 pattern => {
     xxxxx
     zzzzz
-    xxxxx
+    xyxyx
 }
 action => {
     commit

@@ -17,6 +17,9 @@ const (
 	isXStitch        = "xstitch"
 	isHorizontalLine = "hline"
 	isVerticalLine   = "vline"
+	vLineSymbol      = "|"
+	hLineSymbol      = "-----"
+	hLinePartial     = "--"
 )
 
 var (
@@ -27,7 +30,7 @@ var (
 type (
 	Cell struct {
 		ID    string
-		Value string
+		Value template.HTML
 		Style template.CSS
 	}
 	HTMLPattern struct {
@@ -85,11 +88,11 @@ func (o HTMLPattern) initCells(j Pattern) []Cell {
 			}
 			cell := Cell{}
 			cell.ID = o.newID(y, x)
-			cell.Value = val
+			cell.Value = template.HTML(val)
 			style, hvLine := j.layout(y, x)
 			cell.Style = template.CSS(style)
 			if hvLine != "" {
-				cell.Value = hvLine
+				cell.Value = template.HTML(hvLine)
 			}
 			results = append(results, cell)
 			y += 1
@@ -107,19 +110,17 @@ func (o HTMLPattern) newID(x, y int) string {
 
 func (p Pattern) layout(x, y int) (string, string) {
 	var style []string
-	isVLine := false
-	isHLine := false
+	vLineColor := ""
+	hLineColor := ""
 	for _, e := range p.entries {
 		for _, c := range e.cells {
 			if c.x == x && c.y == y {
 				s := ""
 				switch e.mode {
 				case isVerticalLine:
-					isVLine = true
-					s = "color: "
+					vLineColor = e.color
 				case isHorizontalLine:
-					isHLine = true
-					s = "color: "
+					hLineColor = e.color
 				case isBottomEdge:
 					s = "border-bottom-style: solid; border-bottom-color: "
 				case isTopEdge:
@@ -138,17 +139,22 @@ func (p Pattern) layout(x, y int) (string, string) {
 		}
 	}
 	sub := ""
-	if isVLine {
-		sub = "|"
+	if vLineColor != "" {
+		sub = colorLine(vLineSymbol, vLineColor)
 	}
-	if isHLine {
+	if hLineColor != "" {
 		if sub == "" {
-			sub = "-----"
+			sub = colorLine(hLineSymbol, hLineColor)
 		} else {
-			sub = "--|--"
+			hSub := colorLine(hLinePartial, hLineColor)
+			sub = fmt.Sprintf("%s%s%s", hSub, colorLine(vLineSymbol, vLineColor), hSub)
 		}
 	}
 	return strings.Join(style, ";"), sub
+}
+
+func colorLine(symbol, color string) string {
+	return fmt.Sprintf("<div style=\"color: %s\">%s</div>", color, symbol)
 }
 
 func (p Pattern) ToHTMLPattern() HTMLPattern {

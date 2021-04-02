@@ -708,9 +708,7 @@ func parseActions(b []byte) ([]patternAction, *ParserError) {
 			}
 		}
 		newLines := inserts
-		for _, line := range lines[read:] {
-			newLines = append(newLines, line)
-		}
+		newLines = append(newLines, lines[read:]...)
 		lines = newLines
 	}
 	if len(blocks) == 0 {

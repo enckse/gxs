@@ -2,6 +2,7 @@ package internal
 
 import (
 	"fmt"
+	"html/template"
 	"testing"
 )
 
@@ -20,7 +21,7 @@ func testCell(cell Cell, expectedID, expectedValue string, t *testing.T) {
 	if cell.ID != expectedID {
 		t.Error(fmt.Sprintf("%s != %s", cell.ID, expectedID))
 	}
-	if cell.Value != expectedValue {
+	if cell.Value != template.HTML(expectedValue) {
 		t.Error(fmt.Sprintf("%s != %s", cell.Value, expectedValue))
 	}
 }
