@@ -568,18 +568,6 @@ func parseBlocks(blocks []patternBlock) ([]patternAction, *ParserError) {
 				}
 				action.palette[char] = color
 			}
-		case "include":
-			for _, including := range block.lines {
-				b, err := os.ReadFile(including)
-				if err != nil {
-					return nil, &ParserError{Error: err, Backtrace: block.lines}
-				}
-				adding, pErr := parseActions(b)
-				if pErr != nil {
-					return nil, pErr
-				}
-				actions = append(actions, adding...)
-			}
 		case "pattern":
 			if len(action.pattern) > 0 {
 				return nil, block.toError("pattern not committed")
@@ -705,10 +693,25 @@ func parseActions(b []byte) ([]patternAction, *ParserError) {
 		if read == 0 {
 			break
 		}
+		var inserts []string
 		if block.mode != defaultBlock {
-			blocks = append(blocks, block)
+			if block.mode == "include" {
+				for _, line := range block.lines {
+					data, err := os.ReadFile(line)
+					if err != nil {
+						return nil, &ParserError{Error: err, Backtrace: block.lines}
+					}
+					inserts = append(inserts, strings.Split(string(data), "\n")...)
+				}
+			} else {
+				blocks = append(blocks, block)
+			}
 		}
-		lines = lines[read:]
+		newLines := inserts
+		for _, line := range lines[read:] {
+			newLines = append(newLines, line)
+		}
+		lines = newLines
 	}
 	if len(blocks) == 0 {
 		return nil, &ParserError{Error: fmt.Errorf("no blocks found")}
