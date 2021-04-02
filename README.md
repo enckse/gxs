@@ -113,3 +113,5 @@ action => {
     commit
 }
 ```
+
+see `examples/` for more.
