@@ -31,7 +31,7 @@
 <script>
 
 function make_grid_id(x, y) {
-    return ("{{ .Pad }}" + x).slice(-4) + "{{ .PadChar }}" + ("{{ .Pad }}" + y).slice(-4);
+    return ("{{ .Pad }}" + x).slice(-{{ .PadLength }}) + "{{ .PadChar }}" + ("{{ .Pad }}" + y).slice(-{{ .PadLength }});
 }
 
 document.onreadystatechange = function () {

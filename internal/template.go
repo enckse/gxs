@@ -24,6 +24,7 @@ type (
 	Pattern struct {
 		Size    int
 		Pad     string
+		PadLength int
 		PadChar string
 		Cells   []Cell
 		JSON    []Entry
@@ -92,7 +93,7 @@ func (p JSONPattern) ToPattern() Pattern {
 		padString = fmt.Sprintf("0%s", padString)
 		padding = padding - 1
 	}
-	obj := Pattern{Size: p.size + 1, Pad: padString, PadChar: padCharacter}
+	obj := Pattern{Size: p.size + 1, PadLength: len(padString), Pad: padString, PadChar: padCharacter}
 	obj.Cells = obj.initCells()
 	obj.JSON = p.Entries
 	return obj
