@@ -34,7 +34,7 @@ func main() {
 	out := flag.String("output", "", "file to save output (else stdout)")
 	flag.Parse()
 	fileName := *file
-	b := []byte("")
+	var b []byte
 	if len(fileName) == 0 {
 		die("no input file found", fmt.Errorf("input file required"))
 	} else {
