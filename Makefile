@@ -5,7 +5,9 @@ EXAMPLES := $(shell ls examples/)
 
 .PHONY: $(TESTS) $(EXAMPLES)
 
-all: test example $(GXS)
+all: $(GXS) check
+
+check: test example 
 
 $(GXS): $(shell find cmd/ -type f) $(shell find internal/ -type f)
 	go build -o $(GXS) cmd/main.go

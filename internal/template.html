@@ -44,30 +44,6 @@ document.onreadystatechange = function () {
     }
 }
 
-function expand_range(token) {
-    var parts = token.split("-");
-    var results = [];
-    var first = parseInt(parts[0]);
-    if (parts.length == 1) {
-        results.push(first);
-    } else {
-        if (parts.length > 2) {
-            throw "invalid split, range must be M-N only: " + token;
-        }
-        second = parseInt(parts[1]);
-        if (second <= first) {
-            throw "invalid range, N > M: " + token;
-        }
-        var x = first;
-        while (x <= second) {
-            results.push(x);
-            x += 1;
-        }
-    }
-    console.log(results);
-    return results;
-}
-
 function build() {
     var obj = {{ .JSON }};
     var width = {{ .Size }};
@@ -79,26 +55,11 @@ function build() {
         var color = entry["color"];
         var mode = entry["mode"];
         var cells = entry["cells"];
-        var items = []
         for (var j = 0; j < cells.length; j++) {
             var cell = cells[j];
             var parts = cell.split(split_char);
-            var x = expand_range(parts[1]);
-            var y = expand_range(parts[0]);
-            var range_x = [];
-            var range_y = [];
-            for (var k = 0; k < x.length; k++) {
-                for (var l = 0; l < y.length; l++) {
-                    console.log(x[k].toString() + split_char + y[l].toString());
-                    items.push(x[k].toString() + split_char + y[l].toString());
-                }
-            }
-        }
-        for (var j = 0; j < items.length; j++) {
-            var cell = items[j];
-            var parts = cell.split(split_char);
-            var raw_x = parts[0];
-            var raw_y = parts[1];
+            var raw_x = parts[1];
+            var raw_y = parts[0];
             var x = parseInt(raw_x);
             var y = parseInt(raw_y);
             if (x <= 0 || y <= 0) {
