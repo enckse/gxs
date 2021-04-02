@@ -119,7 +119,7 @@ pattern => {
 func TestStitchModeSetting(t *testing.T) {
 	_, err := Parse([]byte(`
 mode => {
-	xs
+	xstitch
 	yy
 }`))
 	if err == nil || err.Error.Error() != "incorrect stitch mode setting" {
@@ -127,10 +127,10 @@ mode => {
 	}
 	_, err = Parse([]byte(`
 mode => {
-	xs
+	xstitch
 }
 mode => {
-	te
+	topedge
 }`))
 	if err == nil || err.Error.Error() != "stitching not committed" {
 		t.Error("wrong error")
@@ -140,10 +140,10 @@ mode => {
 func TestNoActions(t *testing.T) {
 	_, err := Parse([]byte(`
 mode => {
-	xs
+	xstitch
 }
 mode => {
-	xs
+	xstitch
 }`))
 	if err == nil || err.Error.Error() != "no actions, nothing committed?" {
 		t.Error("wrong error")
@@ -177,7 +177,7 @@ func TestUnknownSymbol(t *testing.T) {
 	x => y
 }
 mode => {
-	xs
+	xstitch
 }
 pattern => {
 	z
@@ -199,7 +199,7 @@ palette => {
 	z => #231234
 }
 mode => {
-	xs
+	xstitch
 }
 pattern => {
 	zxxxy
@@ -217,7 +217,7 @@ palette => {
 	r => #231234
 }
 mode => {
-	be
+	bottomedge
 }
 pattern => {
 	xxxxx

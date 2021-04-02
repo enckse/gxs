@@ -5,7 +5,7 @@ palette => {
     z => NONE
 }
 mode => {
-    xs
+    xstitch
 }
 pattern => {
     xyzyz
@@ -17,7 +17,7 @@ action => {
 }
 # reuse the palette
 mode => {
-    te
+    topedge
 }
 # patterns must always be redefined
 pattern => {

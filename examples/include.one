@@ -4,7 +4,7 @@ palette => {
     z => NONE
 }
 mode => {
-    xs
+    xstitch
 }
 pattern => {
     xyzyz

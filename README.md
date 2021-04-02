@@ -24,15 +24,15 @@ mode is the type of stitch that will be built
 
 | type | explanation |
 | ---  | ---         |
-| xs   | full X cross stitch |
-| te   | back stitch at the top edge |
-| be   | back stitch at the bottom edge |
-| le   | back stitch on the left edge |
-| re   | back stitch on the right edge |
+| xstitch   | full X cross stitch |
+| topedge   | back stitch at the top edge |
+| bottomedge   | back stitch at the bottom edge |
+| leftedge   | back stitch on the left edge |
+| rightedge   | back stitch on the right edge |
 
 ```
 mode => {
-    xs
+    xstitch
 }
 ```
 
@@ -89,7 +89,7 @@ palette => {
     z => NONE
 }
 mode => {
-    xs
+    xstitch
 }
 pattern => {
     xyzyz

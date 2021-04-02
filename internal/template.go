@@ -10,11 +10,11 @@ import (
 
 const (
 	gridLocation = "x"
-	isBottomEdge = "be"
-	isTopEdge    = "te"
-	isRightEdge  = "re"
-	isLeftEdge   = "le"
-	isXStitch    = "xs"
+	isBottomEdge = "bottomedge"
+	isTopEdge    = "topedge"
+	isRightEdge  = "rightedge"
+	isLeftEdge   = "leftedge"
+	isXStitch    = "xstitch"
 )
 
 var (
