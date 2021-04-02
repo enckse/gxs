@@ -28,113 +28,47 @@
   padding: 0px 10px;
 }
 </style>
-<script>
-
-function make_grid_id(x, y) {
-    return ("000" + x).slice(- 3 ) + "x" + ("000" + y).slice(- 3 );
-}
-
-document.onreadystatechange = function () {
-    if (document.readyState == "complete") {
-        try {
-            build();
-        } catch (error) {
-            alert(error);
-        }
-    }
-}
-
-function build() {
-    var obj = [{"cells":["1x1","3x2","3x3"],"mode":"xs","color":"rgb(199, 43, 59)"},{"cells":["2x1","4x1","2x2","4x2"],"mode":"xs","color":"#333333"},{"cells":["1x1","2x1","3x1","4x1","5x1","1x3","2x3","3x3","4x3","5x3"],"mode":"te","color":"rgb(199, 43, 59)"}];
-    var width =  6 ;
-    var height =  6 ;
-    var history = {};
-    var split_char = "x";
-    for (var i = 0; i < obj.length; i++) {
-        var entry = obj[i];
-        var color = entry["color"];
-        var mode = entry["mode"];
-        var cells = entry["cells"];
-        for (var j = 0; j < cells.length; j++) {
-            var cell = cells[j];
-            var parts = cell.split(split_char);
-            var raw_x = parts[1];
-            var raw_y = parts[0];
-            var x = parseInt(raw_x);
-            var y = parseInt(raw_y);
-            if (x <= 0 || y <= 0) {
-                throw "found <= 0 cell (must be > 0): " + cell;
-            }
-            if (x >= width || y >= height) {
-                throw "found cell outside height/width: " + cell;
-            }
-            var pad = make_grid_id(raw_x, raw_y);
-            var element = document.getElementById(pad);
-            var style = "";
-            if (pad in history) {
-                style = history[pad];
-            }
-            if (mode === "te") {
-                style += " border-top-style: solid; border-top-color: ";
-            } else if (mode == "be") {
-                style += " border-bottom-style: solid; border-bottom-color: ";
-            } else if (mode == "re") {
-                style += " border-right-style: solid; border-right-color: ";
-            } else if (mode == "le") {
-                style += " border-left-style: solid; border-left-color: ";
-            } else if (mode == "xs") {
-                style += " background-color: ";
-            } else {
-                throw "unknown mode";
-            }
-            style += color + ";";
-            element.setAttribute("style", style);
-            history[pad] = style;
-        }
-    }
-}
-</script>
     </head>
     <body>
         <div class="main">
   <div class="container">
   <div class="grid" id="grid">
-      <div class="cell" id="000x000"></div>
-      <div class="cell" id="000x001">1</div>
-      <div class="cell" id="000x002">2</div>
-      <div class="cell" id="000x003">3</div>
-      <div class="cell" id="000x004">4</div>
-      <div class="cell" id="000x005">5</div>
-      <div class="cell" id="001x000">1</div>
-      <div class="cell" id="001x001"></div>
-      <div class="cell" id="001x002"></div>
-      <div class="cell" id="001x003"></div>
-      <div class="cell" id="001x004"></div>
-      <div class="cell" id="001x005"></div>
-      <div class="cell" id="002x000">2</div>
-      <div class="cell" id="002x001"></div>
-      <div class="cell" id="002x002"></div>
-      <div class="cell" id="002x003"></div>
-      <div class="cell" id="002x004"></div>
-      <div class="cell" id="002x005"></div>
-      <div class="cell" id="003x000">3</div>
-      <div class="cell" id="003x001"></div>
-      <div class="cell" id="003x002"></div>
-      <div class="cell" id="003x003"></div>
-      <div class="cell" id="003x004"></div>
-      <div class="cell" id="003x005"></div>
-      <div class="cell" id="004x000">4</div>
-      <div class="cell" id="004x001"></div>
-      <div class="cell" id="004x002"></div>
-      <div class="cell" id="004x003"></div>
-      <div class="cell" id="004x004"></div>
-      <div class="cell" id="004x005"></div>
-      <div class="cell" id="005x000">5</div>
-      <div class="cell" id="005x001"></div>
-      <div class="cell" id="005x002"></div>
-      <div class="cell" id="005x003"></div>
-      <div class="cell" id="005x004"></div>
-      <div class="cell" id="005x005"></div>
+      <div class="cell" style="" id="000x000"></div>
+      <div class="cell" style="" id="001x000">1</div>
+      <div class="cell" style="" id="002x000">2</div>
+      <div class="cell" style="" id="003x000">3</div>
+      <div class="cell" style="" id="004x000">4</div>
+      <div class="cell" style="" id="005x000">5</div>
+      <div class="cell" style="" id="000x001">1</div>
+      <div class="cell" style="background-color:  rgb(199, 43, 59);border-top-style: solid; border-top-color:  rgb(199, 43, 59)" id="001x001"></div>
+      <div class="cell" style="background-color:  #333333;border-top-style: solid; border-top-color:  rgb(199, 43, 59)" id="002x001"></div>
+      <div class="cell" style="border-top-style: solid; border-top-color:  rgb(199, 43, 59)" id="003x001"></div>
+      <div class="cell" style="background-color:  #333333;border-top-style: solid; border-top-color:  rgb(199, 43, 59)" id="004x001"></div>
+      <div class="cell" style="border-top-style: solid; border-top-color:  rgb(199, 43, 59)" id="005x001"></div>
+      <div class="cell" style="" id="000x002">2</div>
+      <div class="cell" style="" id="001x002"></div>
+      <div class="cell" style="background-color:  #333333" id="002x002"></div>
+      <div class="cell" style="background-color:  rgb(199, 43, 59)" id="003x002"></div>
+      <div class="cell" style="background-color:  #333333" id="004x002"></div>
+      <div class="cell" style="" id="005x002"></div>
+      <div class="cell" style="" id="000x003">3</div>
+      <div class="cell" style="border-top-style: solid; border-top-color:  rgb(199, 43, 59)" id="001x003"></div>
+      <div class="cell" style="border-top-style: solid; border-top-color:  rgb(199, 43, 59)" id="002x003"></div>
+      <div class="cell" style="background-color:  rgb(199, 43, 59);border-top-style: solid; border-top-color:  rgb(199, 43, 59)" id="003x003"></div>
+      <div class="cell" style="border-top-style: solid; border-top-color:  rgb(199, 43, 59)" id="004x003"></div>
+      <div class="cell" style="border-top-style: solid; border-top-color:  rgb(199, 43, 59)" id="005x003"></div>
+      <div class="cell" style="" id="000x004">4</div>
+      <div class="cell" style="" id="001x004"></div>
+      <div class="cell" style="" id="002x004"></div>
+      <div class="cell" style="" id="003x004"></div>
+      <div class="cell" style="" id="004x004"></div>
+      <div class="cell" style="" id="005x004"></div>
+      <div class="cell" style="" id="000x005">5</div>
+      <div class="cell" style="" id="001x005"></div>
+      <div class="cell" style="" id="002x005"></div>
+      <div class="cell" style="" id="003x005"></div>
+      <div class="cell" style="" id="004x005"></div>
+      <div class="cell" style="" id="005x005"></div>
   </div>
 </div>
         </div>

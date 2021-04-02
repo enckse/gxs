@@ -5,12 +5,12 @@ import (
 	"testing"
 )
 
-func TestNewJSONPattern(t *testing.T) {
-	_, err := NewJSONPattern(0)
+func TestNewPattern(t *testing.T) {
+	_, err := NewPattern(0)
 	if err == nil {
 		t.Error("invalid request, size is invalid")
 	}
-	_, err = NewJSONPattern(1)
+	_, err = NewPattern(1)
 	if err != nil {
 		t.Error("valid JSON result")
 	}
@@ -26,33 +26,30 @@ func testCell(cell Cell, expectedID, expectedValue string, t *testing.T) {
 }
 
 func TestToPattern(t *testing.T) {
-	j, err := NewJSONPattern(2)
+	j, err := NewPattern(2)
 	if err != nil {
 		t.Error("valid JSON result")
 	}
-	pattern := j.ToPattern()
-	if pattern.Size != 3 || pattern.Pad != "000" || pattern.PadChar != "x" {
+	pattern := j.ToHTMLPattern()
+	if pattern.Size != 3 {
 		t.Error("invalid conversion")
 	}
 	if len(pattern.Cells) != 9 {
 		t.Error("invalid cells")
 	}
 	testCell(pattern.Cells[0], "000x000", "", t)
-	testCell(pattern.Cells[1], "000x001", "1", t)
-	testCell(pattern.Cells[2], "000x002", "2", t)
-	testCell(pattern.Cells[3], "001x000", "1", t)
+	testCell(pattern.Cells[1], "001x000", "1", t)
+	testCell(pattern.Cells[2], "002x000", "2", t)
+	testCell(pattern.Cells[3], "000x001", "1", t)
 	testCell(pattern.Cells[4], "001x001", "", t)
-	testCell(pattern.Cells[5], "001x002", "", t)
-	testCell(pattern.Cells[6], "002x000", "2", t)
-	testCell(pattern.Cells[7], "002x001", "", t)
+	testCell(pattern.Cells[5], "002x001", "", t)
+	testCell(pattern.Cells[6], "000x002", "2", t)
+	testCell(pattern.Cells[7], "001x002", "", t)
 	testCell(pattern.Cells[8], "002x002", "", t)
-	if len(j.Entries) != len(pattern.JSON) {
-		t.Error("pattern JSON not assigned")
-	}
 }
 
 func TestBuild(t *testing.T) {
-	j, err := NewJSONPattern(1)
+	j, err := NewPattern(1)
 	if err != nil {
 		t.Error("pattern is valid")
 	}

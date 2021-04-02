@@ -28,78 +28,12 @@
   padding: 0px 10px;
 }
 </style>
-<script>
-
-function make_grid_id(x, y) {
-    return ("{{ .Pad }}" + x).slice(-{{ .PadLength }}) + "{{ .PadChar }}" + ("{{ .Pad }}" + y).slice(-{{ .PadLength }});
-}
-
-document.onreadystatechange = function () {
-    if (document.readyState == "complete") {
-        try {
-            build();
-        } catch (error) {
-            alert(error);
-        }
-    }
-}
-
-function build() {
-    var obj = {{ .JSON }};
-    var width = {{ .Size }};
-    var height = {{ .Size }};
-    var history = {};
-    var split_char = "x";
-    for (var i = 0; i < obj.length; i++) {
-        var entry = obj[i];
-        var color = entry["color"];
-        var mode = entry["mode"];
-        var cells = entry["cells"];
-        for (var j = 0; j < cells.length; j++) {
-            var cell = cells[j];
-            var parts = cell.split(split_char);
-            var raw_x = parts[1];
-            var raw_y = parts[0];
-            var x = parseInt(raw_x);
-            var y = parseInt(raw_y);
-            if (x <= 0 || y <= 0) {
-                throw "found <= 0 cell (must be > 0): " + cell;
-            }
-            if (x >= width || y >= height) {
-                throw "found cell outside height/width: " + cell;
-            }
-            var pad = make_grid_id(raw_x, raw_y);
-            var element = document.getElementById(pad);
-            var style = "";
-            if (pad in history) {
-                style = history[pad];
-            }
-            if (mode === "te") {
-                style += " border-top-style: solid; border-top-color: ";
-            } else if (mode == "be") {
-                style += " border-bottom-style: solid; border-bottom-color: ";
-            } else if (mode == "re") {
-                style += " border-right-style: solid; border-right-color: ";
-            } else if (mode == "le") {
-                style += " border-left-style: solid; border-left-color: ";
-            } else if (mode == "xs") {
-                style += " background-color: ";
-            } else {
-                throw "unknown mode";
-            }
-            style += color + ";";
-            element.setAttribute("style", style);
-            history[pad] = style;
-        }
-    }
-}
-</script>
     </head>
     <body>
         <div class="main">
   <div class="container">
   <div class="grid" id="grid">{{ range $idx, $id := .Cells }}
-      <div class="cell" id="{{ $id.ID }}">{{ $id.Value }}</div>{{ end }}
+      <div class="cell" style="{{ $id.Style }}" id="{{ $id.ID }}">{{ $id.Value }}</div>{{ end }}
   </div>
 </div>
         </div>

@@ -607,7 +607,7 @@ func (a patternAction) toPatternError(message string) *ParserError {
 	return &ParserError{Error: fmt.Errorf(message), Backtrace: a.pattern}
 }
 
-func buildPattern(actions []patternAction) (JSONPattern, *ParserError) {
+func buildPattern(actions []patternAction) (Pattern, *ParserError) {
 	var entries []Entry
 	var maxSize = -1
 	for _, action := range actions {
@@ -635,7 +635,7 @@ func buildPattern(actions []patternAction) (JSONPattern, *ParserError) {
 					curColor[action.stitchMode] = modeSet
 					tracking[color] = curColor
 				} else {
-					return JSONPattern{}, action.toPatternError("symbol unknown")
+					return Pattern{}, action.toPatternError("symbol unknown")
 				}
 			}
 		}
@@ -649,7 +649,7 @@ func buildPattern(actions []patternAction) (JSONPattern, *ParserError) {
 			}
 		}
 	}
-	pattern, err := NewJSONPattern(maxSize + 1)
+	pattern, err := NewPattern(maxSize + 1)
 	if err != nil {
 		return pattern, &ParserError{Error: err}
 	}
@@ -657,10 +657,10 @@ func buildPattern(actions []patternAction) (JSONPattern, *ParserError) {
 	return pattern, nil
 }
 
-func Parse(b []byte) (JSONPattern, *ParserError) {
+func Parse(b []byte) (Pattern, *ParserError) {
 	lines := strings.Split(string(b), "\n")
 	var blocks []patternBlock
-	var pattern JSONPattern
+	var pattern Pattern
 	for {
 		block, read := next(lines)
 		if block.err != nil {
