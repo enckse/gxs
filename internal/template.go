@@ -9,12 +9,14 @@ import (
 )
 
 const (
-	gridLocation = "x"
-	isBottomEdge = "bottomedge"
-	isTopEdge    = "topedge"
-	isRightEdge  = "rightedge"
-	isLeftEdge   = "leftedge"
-	isXStitch    = "xstitch"
+	gridLocation     = "x"
+	isBottomEdge     = "bottomedge"
+	isTopEdge        = "topedge"
+	isRightEdge      = "rightedge"
+	isLeftEdge       = "leftedge"
+	isXStitch        = "xstitch"
+	isHorizontalLine = "hline"
+	isVerticalLine   = "vline"
 )
 
 var (
@@ -84,7 +86,11 @@ func (o HTMLPattern) initCells(j Pattern) []Cell {
 			cell := Cell{}
 			cell.ID = o.newID(y, x)
 			cell.Value = val
-			cell.Style = template.CSS(j.findStyle(y, x))
+			style, hvLine := j.layout(y, x)
+			cell.Style = template.CSS(style)
+			if hvLine != "" {
+				cell.Value = hvLine
+			}
 			results = append(results, cell)
 			y += 1
 		}
@@ -99,13 +105,21 @@ func (o HTMLPattern) newID(x, y int) string {
 	return fmt.Sprintf("%s%s%s", left, gridLocation, right)
 }
 
-func (p Pattern) findStyle(x, y int) string {
+func (p Pattern) layout(x, y int) (string, string) {
 	var style []string
+	isVLine := false
+	isHLine := false
 	for _, e := range p.entries {
 		for _, c := range e.cells {
 			if c.x == x && c.y == y {
 				s := ""
 				switch e.mode {
+				case isVerticalLine:
+					isVLine = true
+					s = "color: "
+				case isHorizontalLine:
+					isHLine = true
+					s = "color: "
 				case isBottomEdge:
 					s = "border-bottom-style: solid; border-bottom-color: "
 				case isTopEdge:
@@ -123,7 +137,18 @@ func (p Pattern) findStyle(x, y int) string {
 			}
 		}
 	}
-	return strings.Join(style, ";")
+	sub := ""
+	if isVLine {
+		sub = "|"
+	}
+	if isHLine {
+		if sub == "" {
+			sub = "-----"
+		} else {
+			sub = "--|--"
+		}
+	}
+	return strings.Join(style, ";"), sub
 }
 
 func (p Pattern) ToHTMLPattern() HTMLPattern {
