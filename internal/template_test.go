@@ -3,22 +3,20 @@ package internal
 import (
 	"fmt"
 	"testing"
-
-	"voidedtech.com/gxs/internal"
 )
 
 func TestNewJSONPattern(t *testing.T) {
-	_, err := internal.NewJSONPattern(0)
+	_, err := NewJSONPattern(0)
 	if err == nil {
 		t.Error("invalid request, size is invalid")
 	}
-	_, err = internal.NewJSONPattern(1)
+	_, err = NewJSONPattern(1)
 	if err != nil {
 		t.Error("valid JSON result")
 	}
 }
 
-func testCell(cell internal.Cell, expectedID, expectedValue string, t *testing.T) {
+func testCell(cell Cell, expectedID, expectedValue string, t *testing.T) {
 	if cell.ID != expectedID {
 		t.Error(fmt.Sprintf("%s != %s", cell.ID, expectedID))
 	}
@@ -28,7 +26,7 @@ func testCell(cell internal.Cell, expectedID, expectedValue string, t *testing.T
 }
 
 func TestToPattern(t *testing.T) {
-	j, err := internal.NewJSONPattern(2)
+	j, err := NewJSONPattern(2)
 	if err != nil {
 		t.Error("valid JSON result")
 	}
@@ -54,11 +52,11 @@ func TestToPattern(t *testing.T) {
 }
 
 func TestBuild(t *testing.T) {
-	j, err := internal.NewJSONPattern(1)
+	j, err := NewJSONPattern(1)
 	if err != nil {
 		t.Error("pattern is valid")
 	}
-	b, err := internal.Build(j)
+	b, err := Build(j)
 	if err != nil || len(b) == 0 {
 		t.Error("invalid building result")
 	}

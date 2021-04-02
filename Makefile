@@ -1,6 +1,6 @@
 BIN   := bin/
 GXS   := $(BIN)gxs
-TESTS := $(shell find internal -type f -name "*_test.go")
+TESTS := $(PWD)/internal/
 
 .PHONY: $(TESTS)
 
