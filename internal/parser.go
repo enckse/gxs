@@ -608,10 +608,10 @@ func (a patternAction) toPatternError(message string) *ParserError {
 }
 
 func buildPattern(actions []patternAction) (Pattern, *ParserError) {
-	var entries []Entry
+	var entries []entry
 	var maxSize = -1
 	for _, action := range actions {
-		tracking := make(map[string]map[string][]string)
+		tracking := make(map[string]map[string][]cell)
 		for height, line := range action.pattern {
 			if height > maxSize {
 				maxSize = height
@@ -623,15 +623,14 @@ func buildPattern(actions []patternAction) (Pattern, *ParserError) {
 				symbol := fmt.Sprintf("%c", chr)
 				if color, ok := action.palette[symbol]; ok {
 					if _, hasColor := tracking[color]; !hasColor {
-						tracking[color] = make(map[string][]string)
+						tracking[color] = make(map[string][]cell)
 					}
 					curColor := tracking[color]
 					if _, hasMode := curColor[action.stitchMode]; !hasMode {
-						curColor[action.stitchMode] = []string{}
+						curColor[action.stitchMode] = []cell{}
 					}
 					modeSet := curColor[action.stitchMode]
-					offset := fmt.Sprintf("%d%s%d", width+1, gridLocation, height+1)
-					modeSet = append(modeSet, offset)
+					modeSet = append(modeSet, cell{x: width + 1, y: height + 1})
 					curColor[action.stitchMode] = modeSet
 					tracking[color] = curColor
 				} else {
@@ -644,7 +643,7 @@ func buildPattern(actions []patternAction) (Pattern, *ParserError) {
 				continue
 			}
 			for mode, cells := range modes {
-				entry := Entry{Cells: cells, Mode: mode, Color: color}
+				entry := entry{cells: cells, mode: mode, color: color}
 				entries = append(entries, entry)
 			}
 		}
@@ -653,7 +652,7 @@ func buildPattern(actions []patternAction) (Pattern, *ParserError) {
 	if err != nil {
 		return pattern, &ParserError{Error: err}
 	}
-	pattern.Entries = entries
+	pattern.entries = entries
 	return pattern, nil
 }
 

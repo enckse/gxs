@@ -11,10 +11,10 @@ import (
 const (
 	gridLocation = "x"
 	isBottomEdge = "be"
-	isTopEdge = "te"
-	isRightEdge = "re"
-	isLeftEdge = "le"
-	isXStitch = "xs"
+	isTopEdge    = "te"
+	isRightEdge  = "re"
+	isLeftEdge   = "le"
+	isXStitch    = "xs"
 )
 
 var (
@@ -33,15 +33,19 @@ type (
 		padding string
 		Cells   []Cell
 	}
-	Entry struct {
-		Cells []string `json:"cells"`
-		Mode  string   `json:"mode"`
-		Color string   `json:"color"`
+	cell struct {
+		x int
+		y int
+	}
+	entry struct {
+		cells []cell
+		mode  string
+		color string
 	}
 	Pattern struct {
 		size    int
 		pad     int
-		Entries []Entry
+		entries []entry
 	}
 )
 
@@ -97,12 +101,11 @@ func (o HTMLPattern) newID(x, y int) string {
 
 func (p Pattern) findStyle(x, y int) string {
 	var style []string
-	address := fmt.Sprintf("%d%s%d", x, gridLocation, y)
-	for _, e := range p.Entries {
-		for _, c := range e.Cells {
-			if address == c {
+	for _, e := range p.entries {
+		for _, c := range e.cells {
+			if c.x == x && c.y == y {
 				s := ""
-				switch e.Mode {
+				switch e.mode {
 				case isBottomEdge:
 					s = "border-bottom-style: solid; border-bottom-color: "
 				case isTopEdge:
@@ -115,7 +118,7 @@ func (p Pattern) findStyle(x, y int) string {
 					s = "background-color: "
 				}
 				if s != "" {
-					style = append(style, fmt.Sprintf("%s %s", s, e.Color))
+					style = append(style, fmt.Sprintf("%s %s", s, e.color))
 				}
 			}
 		}

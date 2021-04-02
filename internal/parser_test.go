@@ -1,8 +1,6 @@
 package internal
 
 import (
-	"encoding/json"
-	"sort"
 	"testing"
 )
 
@@ -193,7 +191,7 @@ action => {
 }
 
 func TestParser(t *testing.T) {
-	p, err := Parse([]byte(`
+	_, err := Parse([]byte(`
 # allow comments
 palette => {
 	x => NONE
@@ -233,26 +231,5 @@ action => {
 `))
 	if err != nil {
 		t.Error("is valid")
-	}
-	if len(p.Entries) != 3 {
-		t.Error("did not parse properly")
-	}
-	var sorted []string
-	for _, entry := range p.Entries {
-		b, e := json.Marshal(entry)
-		if e != nil {
-			t.Error("unable to marshal JSON")
-		}
-		sorted = append(sorted, string(b))
-	}
-	sort.Strings(sorted)
-	if sorted[0] != `{"cells":["1x1","3x2"],"mode":"xs","color":"#231234"}` {
-		t.Error(sorted[0])
-	}
-	if sorted[1] != `{"cells":["2x2","3x2","4x2","5x2","1x4"],"mode":"be","color":"#231234"}` {
-		t.Error(sorted[1])
-	}
-	if sorted[2] != `{"cells":["5x1","4x2","5x2","3x3","4x3","5x3"],"mode":"xs","color":"rgb(199, 43, 59)"}` {
-		t.Error(sorted[2])
 	}
 }
