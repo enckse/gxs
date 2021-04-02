@@ -494,6 +494,9 @@ func next(stream []string) (patternBlock, int) {
 	block := patternBlock{mode: defaultBlock}
 	for idx < len(stream) {
 		line := strings.TrimSpace(stream[idx])
+		if strings.HasPrefix(line, "#") {
+			line = ""
+		}
 		if len(line) > 0 {
 			if inBlock {
 				if line == "}" {

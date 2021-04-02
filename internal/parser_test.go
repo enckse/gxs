@@ -194,6 +194,7 @@ action => {
 
 func TestParser(t *testing.T) {
 	p, err := Parse([]byte(`
+# allow comments
 palette => {
 	x => NONE
 	y => red

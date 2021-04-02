@@ -22,6 +22,7 @@ func stdin() []byte {
 	var b bytes.Buffer
 	for scanner.Scan() {
 		b.WriteString(scanner.Text())
+		b.WriteString("\n")
 	}
 	if err := scanner.Err(); err != nil {
 		die("failed to read stdin", err)
@@ -35,18 +36,14 @@ func main() {
 	flag.Parse()
 	fileName := *file
 	var b []byte
-	if len(fileName) == 0 {
-		die("no input file found", fmt.Errorf("input file required"))
+	if fileName == "" {
+		b = stdin()
 	} else {
-		if fileName == "--" {
-			b = stdin()
-		} else {
-			raw, err := os.ReadFile(fileName)
-			if err != nil {
-				die("unable to read file", err)
-			}
-			b = raw
+		raw, err := os.ReadFile(fileName)
+		if err != nil {
+			die("unable to read file", err)
 		}
+		b = raw
 	}
 	pattern, pErr := internal.Parse(b)
 	if pErr != nil && pErr.Error != nil {
