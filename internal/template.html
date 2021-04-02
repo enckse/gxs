@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+.container {
+  background: white;
+  display: inline-block;
+  border: 1px dotted black;
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat({{ .Size }}, 10px);
+  grid-template-rows: repeat({{ .Size }}, 10px);
+  grid-gap: 1px;
+}
+.cell {
+  justify-content: center;
+  align-items: center;
+  display: flex;
+  font-family: Arial;
+  font-size: 4pt;
+  font-weight: bold;
+  background: white;
+}
+.main {
+  margin-left: 10px;
+  padding: 0px 10px;
+}
+</style>
+<script>
+
+function make_grid_id(x, y) {
+    return ("{{ .Pad }}" + x).slice(-4) + "{{ .PadChar }}" + ("{{ .Pad }}" + y).slice(-4);
+}
+
+document.onreadystatechange = function () {
+    if (document.readyState == "complete") {
+        try {
+            build();
+        } catch (error) {
+            alert(error);
+        }
+    }
+}
+
+function expand_range(token) {
+    var parts = token.split("-");
+    var results = [];
+    var first = parseInt(parts[0]);
+    if (parts.length == 1) {
+        results.push(first);
+    } else {
+        if (parts.length > 2) {
+            throw "invalid split, range must be M-N only: " + token;
+        }
+        second = parseInt(parts[1]);
+        if (second <= first) {
+            throw "invalid range, N > M: " + token;
+        }
+        var x = first;
+        while (x <= second) {
+            results.push(x);
+            x += 1;
+        }
+    }
+    console.log(results);
+    return results;
+}
+
+function build() {
+    var obj = {{ .JSON }};
+    var width = {{ .Size }};
+    var height = {{ .Size }};
+    var history = {};
+    var split_char = "x";
+    for (var i = 0; i < obj.length; i++) {
+        var entry = obj[i];
+        var color = entry["color"];
+        if (color in floss_lookup) {
+            color = floss_lookup[color];
+        }
+        var mode = entry["mode"];
+        var cells = entry["cells"];
+        var items = []
+        for (var j = 0; j < cells.length; j++) {
+            var cell = cells[j];
+            var parts = cell.split(split_char);
+            var x = expand_range(parts[1]);
+            var y = expand_range(parts[0]);
+            var range_x = [];
+            var range_y = [];
+            for (var k = 0; k < x.length; k++) {
+                for (var l = 0; l < y.length; l++) {
+                    console.log(x[k].toString() + split_char + y[l].toString());
+                    items.push(x[k].toString() + split_char + y[l].toString());
+                }
+            }
+        }
+        for (var j = 0; j < items.length; j++) {
+            var cell = items[j];
+            var parts = cell.split(split_char);
+            var raw_x = parts[0];
+            var raw_y = parts[1];
+            var x = parseInt(raw_x);
+            var y = parseInt(raw_y);
+            if (x <= 0 || y <= 0) {
+                throw "found <= 0 cell (must be > 0): " + cell;
+            }
+            if (x >= width || y >= height) {
+                throw "found cell outside height/width: " + cell;
+            }
+            var pad = make_grid_id(raw_x, raw_y);
+            var element = document.getElementById(pad);
+            var style = "";
+            if (pad in history) {
+                style = history[pad];
+            }
+            if (mode === "te") {
+                style += " border-top-style: solid; border-top-color: ";
+            } else if (mode == "be") {
+                style += " border-bottom-style: solid; border-bottom-color: ";
+            } else if (mode == "re") {
+                style += " border-right-style: solid; border-right-color: ";
+            } else if (mode == "le") {
+                style += " border-left-style: solid; border-left-color: ";
+            } else if (mode == "xs") {
+                style += " background-color: ";
+            } else {
+                throw "unknown mode";
+            }
+            style += color + ";";
+            element.setAttribute("style", style);
+            history[pad] = style;
+        }
+    }
+}
+</script>
+    </head>
+    <body>
+        <div class="main">
+  <div class="container">
+  <div class="grid" id="grid">{{ range $idx, $id := .Cells }}
+      <div class="cell" id="{{ $id.ID }}">{{ $id.Value }}</div>{{ end }}
+  </div>
+</div>
+        </div>
+    </body>
+</html>

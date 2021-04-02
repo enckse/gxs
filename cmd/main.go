@@ -3,75 +3,18 @@ package main
 import (
 	"bufio"
 	"bytes"
-	_ "embed"
 	"flag"
 	"fmt"
-	"html/template"
-	"net/http"
+	"io"
 	"os"
-)
 
-var (
-	//go:embed "template.html"
-	templateHTML string
+	"voidedtech.com/gxs/internal"
 )
 
 func die(message string, err error) {
-	fmt.Println(message)
-	fmt.Println(err)
+	fmt.Fprintln(os.Stderr, message)
+	fmt.Fprintln(os.Stderr, err)
 	panic("failed")
-}
-
-type (
-	Cell struct {
-		ID    string
-		Value string
-	}
-	Pattern struct {
-		Size        int
-		Pad         string
-		PadChar     string
-		Interactive bool
-		Cells       []Cell
-		JSON        template.JS
-	}
-)
-
-func (o Pattern) pad(val int) string {
-	padded := fmt.Sprintf("%s%d", o.Pad, val)
-	for len(padded) > len(o.Pad) {
-		padded = padded[1:]
-	}
-	return padded
-}
-
-func (o Pattern) initCells() []Cell {
-	var results []Cell
-	x := 0
-	for x < o.Size {
-		y := 0
-		for y < o.Size {
-			left := o.pad(x)
-			right := o.pad(y)
-			val := ""
-			if x == 0 {
-				val = fmt.Sprintf("%d", y)
-			}
-			if y == 0 {
-				val = fmt.Sprintf("%d", x)
-			}
-			if x == 0 && y == 0 {
-				val = ""
-			}
-			cell := Cell{}
-			cell.ID = fmt.Sprintf("%s%s%s", left, o.PadChar, right)
-			cell.Value = val
-			results = append(results, cell)
-			y += 1
-		}
-		x += 1
-	}
-	return results
 }
 
 func stdin() []byte {
@@ -87,20 +30,13 @@ func stdin() []byte {
 }
 
 func main() {
-	size := flag.Int("size", 25, "pattern size")
-	pad := flag.Int("pad", 4, "id padding (with 0s)")
-	char := flag.String("padchar", "x", "padding character")
-	bind := flag.String("bind", "", "local binding to use for server")
-	file := flag.String("input", "", "file to take as an input pattern (-- stdin)")
+	file := flag.String("input", "", "file to take as an input pattern (else stdin)")
+	out := flag.String("output", "", "file to save output (else stdout)")
 	flag.Parse()
 	fileName := *file
-	b := []byte("[]")
-	binding := *bind
-	isCommandLine := binding == ""
+	b := []byte("")
 	if len(fileName) == 0 {
-		if isCommandLine {
-			die("no input pattern and non-interactive editing", fmt.Errorf("bad configuration"))
-		}
+		die("no input file found", fmt.Errorf("input file required"))
 	} else {
 		if fileName == "--" {
 			b = stdin()
@@ -112,40 +48,26 @@ func main() {
 			b = raw
 		}
 	}
-	tmpl, err := template.New("t").Parse(templateHTML)
+	pattern, pErr := internal.Parse(b)
+	if pErr.Error != nil {
+		for _, line := range pErr.Backtrace {
+			fmt.Fprintln(os.Stderr, line)
+		}
+		die("unable to parse pattern", pErr.Error)
+	}
+	tmpl, err := internal.Build(pattern)
 	if err != nil {
-		die("unable to parse template", err)
+		die("failed to template", err)
 	}
-	padding := *pad
-	if padding < 1 {
-		die("invalid padding", fmt.Errorf("< 1"))
+	var write io.Writer
+	outFile := *out
+	if len(outFile) == 0 {
+		write = os.Stdout
+	} else {
+		var b bytes.Buffer
+		write = &b
 	}
-	padString := ""
-	for padding > 0 {
-		padString = fmt.Sprintf("0%s", padString)
-		padding = padding - 1
-	}
-	obj := Pattern{Size: *size + 1, Pad: padString, PadChar: *char}
-	obj.Cells = obj.initCells()
-	obj.JSON = template.JS(string(b))
-	if obj.Size <= 0 {
-		die("invalid size", fmt.Errorf("< 0"))
-	}
-	obj.Interactive = false
-	if isCommandLine {
-		if err := tmpl.Execute(os.Stdout, obj); err != nil {
-			die("unable to execute template", err)
-		}
-		return
-	}
-	obj.Interactive = true
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		if err := tmpl.Execute(w, obj); err != nil {
-			fmt.Printf("failed to execute template: %v\n", err)
-		}
-	})
-	fmt.Println(binding)
-	if err := http.ListenAndServe(binding, nil); err != nil {
-		die("unable to bind", err)
+	if _, err := write.Write(tmpl); err != nil {
+		die("failed to write output", err)
 	}
 }
