@@ -49,9 +49,11 @@ func main() {
 		}
 	}
 	pattern, pErr := internal.Parse(b)
-	if pErr.Error != nil {
-		for _, line := range pErr.Backtrace {
-			fmt.Fprintln(os.Stderr, line)
+	if pErr != nil && pErr.Error != nil {
+		if pErr.Backtrace != nil {
+			for _, line := range pErr.Backtrace {
+				fmt.Fprintln(os.Stderr, line)
+			}
 		}
 		die("unable to parse pattern", pErr.Error)
 	}

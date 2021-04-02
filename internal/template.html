@@ -77,9 +77,6 @@ function build() {
     for (var i = 0; i < obj.length; i++) {
         var entry = obj[i];
         var color = entry["color"];
-        if (color in floss_lookup) {
-            color = floss_lookup[color];
-        }
         var mode = entry["mode"];
         var cells = entry["cells"];
         var items = []

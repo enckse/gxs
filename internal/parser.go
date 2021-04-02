@@ -607,8 +607,8 @@ func (a patternAction) toPatternError(message string) *ParserError {
 func buildPattern(actions []patternAction) (JSONPattern, *ParserError) {
 	var entries []Entry
 	var maxSize = -1
-	tracking := make(map[string]map[string][]string)
 	for _, action := range actions {
+		tracking := make(map[string]map[string][]string)
 		for height, line := range action.pattern {
 			if height > maxSize {
 				maxSize = height
@@ -636,19 +636,19 @@ func buildPattern(actions []patternAction) (JSONPattern, *ParserError) {
 				}
 			}
 		}
+		for color, modes := range tracking {
+			if color == noColor {
+				continue
+			}
+			for mode, cells := range modes {
+				entry := Entry{Cells: cells, Mode: mode, Color: color}
+				entries = append(entries, entry)
+			}
+		}
 	}
-	pattern, err := NewJSONPattern(maxSize)
+	pattern, err := NewJSONPattern(maxSize + 1)
 	if err != nil {
 		return pattern, &ParserError{Error: err}
-	}
-	for color, modes := range tracking {
-		if color == noColor {
-			continue
-		}
-		for mode, cells := range modes {
-			entry := Entry{Cells: cells, Mode: mode, Color: color}
-			entries = append(entries, entry)
-		}
 	}
 	pattern.Entries = entries
 	return pattern, nil
