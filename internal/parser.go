@@ -2,6 +2,7 @@ package internal
 
 import (
 	"fmt"
+	"os"
 	"strconv"
 	"strings"
 )
@@ -567,6 +568,18 @@ func parseBlocks(blocks []patternBlock) ([]patternAction, *ParserError) {
 				}
 				action.palette[char] = color
 			}
+		case "include":
+			for _, including := range block.lines {
+				b, err := os.ReadFile(including)
+				if err != nil {
+					return nil, &ParserError{Error: err, Backtrace: block.lines}
+				}
+				adding, pErr := parseActions(b)
+				if pErr != nil {
+					return nil, pErr
+				}
+				actions = append(actions, adding...)
+			}
 		case "pattern":
 			if len(action.pattern) > 0 {
 				return nil, block.toError("pattern not committed")
@@ -681,14 +694,13 @@ func buildPattern(actions []patternAction) (Pattern, *ParserError) {
 	return pattern, nil
 }
 
-func Parse(b []byte) (Pattern, *ParserError) {
+func parseActions(b []byte) ([]patternAction, *ParserError) {
 	lines := strings.Split(string(b), "\n")
 	var blocks []patternBlock
-	var pattern Pattern
 	for {
 		block, read := next(lines)
 		if block.err != nil {
-			return pattern, &ParserError{Error: block.err, Backtrace: lines}
+			return nil, &ParserError{Error: block.err, Backtrace: lines}
 		}
 		if read == 0 {
 			break
@@ -699,14 +711,22 @@ func Parse(b []byte) (Pattern, *ParserError) {
 		lines = lines[read:]
 	}
 	if len(blocks) == 0 {
-		return pattern, &ParserError{Error: fmt.Errorf("no blocks found")}
+		return nil, &ParserError{Error: fmt.Errorf("no blocks found")}
 	}
 	actions, pErr := parseBlocks(blocks)
 	if pErr != nil {
-		return pattern, pErr
+		return nil, pErr
 	}
 	if len(actions) == 0 {
-		return pattern, &ParserError{Error: fmt.Errorf("no actions, nothing committed?")}
+		return nil, &ParserError{Error: fmt.Errorf("no actions, nothing committed?")}
+	}
+	return actions, nil
+}
+
+func Parse(b []byte) (Pattern, *ParserError) {
+	actions, err := parseActions(b)
+	if err != nil {
+		return Pattern{}, err
 	}
 	return buildPattern(actions)
 }

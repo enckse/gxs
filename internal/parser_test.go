@@ -262,3 +262,15 @@ offset => {
 		t.Error(err.Error.Error())
 	}
 }
+
+func TestBadInclude(t *testing.T) {
+	_, err := Parse([]byte(`
+include => {
+	1
+	2
+}`))
+	if err == nil || err.Error.Error() != "open 1: no such file or directory" {
+		t.Error("wrong error")
+		t.Error(err.Error.Error())
+	}
+}
