@@ -2,10 +2,15 @@ package internal
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 )
 
 type (
+	patternOffset struct {
+		x int
+		y int
+	}
 	patternBlock struct {
 		lines []string
 		mode  string
@@ -19,6 +24,7 @@ type (
 		palette    map[string]string
 		stitchMode string
 		pattern    []string
+		offset     patternOffset
 	}
 )
 
@@ -574,7 +580,7 @@ func parseBlocks(blocks []patternBlock) ([]patternAction, *ParserError) {
 				return nil, block.toError("no pattern")
 			}
 			switch action.stitchMode {
-			case "le", "re", "te", "be", "xs":
+			case isLeftEdge, isRightEdge, isTopEdge, isBottomEdge, isXStitch:
 				break
 			default:
 				return nil, block.toError("invalid stitch mode")
@@ -582,6 +588,23 @@ func parseBlocks(blocks []patternBlock) ([]patternAction, *ParserError) {
 			actions = append(actions, action)
 			action.pattern = []string{}
 			action.stitchMode = ""
+		case "offset":
+			if len(block.lines) != 1 {
+				return nil, block.toError("invalid offset")
+			}
+			parts := strings.Split(block.lines[0], "x")
+			if len(parts) != 2 {
+				return nil, block.toError("offset should be Width[x]Height")
+			}
+			x, err := strconv.Atoi(parts[0])
+			if err != nil {
+				return nil, &ParserError{Error: err, Backtrace: block.lines}
+			}
+			y, err := strconv.Atoi(parts[1])
+			if err != nil {
+				return nil, &ParserError{Error: err, Backtrace: block.lines}
+			}
+			action.offset = patternOffset{x: x, y: y}
 		case "mode":
 			if len(block.lines) != 1 {
 				return nil, block.toError("incorrect stitch mode setting")
@@ -612,11 +635,13 @@ func buildPattern(actions []patternAction) (Pattern, *ParserError) {
 	var maxSize = -1
 	for _, action := range actions {
 		tracking := make(map[string]map[string][]cell)
-		for height, line := range action.pattern {
+		for rawHeight, line := range action.pattern {
+			height := rawHeight + action.offset.y
 			if height > maxSize {
 				maxSize = height
 			}
-			for width, chr := range line {
+			for rawWidth, chr := range line {
+				width := rawWidth + action.offset.x
 				if width > maxSize {
 					maxSize = width
 				}

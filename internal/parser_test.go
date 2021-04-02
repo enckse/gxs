@@ -225,11 +225,40 @@ pattern => {
 	xxxxx
 	r
 }
+offset => {
+	1x2
+}
 action => {
 	commit
 }
 `))
 	if err != nil {
 		t.Error("is valid")
+	}
+}
+
+func TestBadOffset(t *testing.T) {
+	_, err := Parse([]byte(`
+offset => {
+	1
+	2
+}`))
+	if err == nil || err.Error.Error() != "invalid offset" {
+		t.Error("wrong error")
+	}
+	_, err = Parse([]byte(`
+offset => {
+	12
+}`))
+	if err == nil || err.Error.Error() != "offset should be Width[x]Height" {
+		t.Error("wrong error")
+	}
+	_, err = Parse([]byte(`
+offset => {
+	BADx2
+}`))
+	if err == nil || err.Error.Error() != "strconv.Atoi: parsing \"BAD\": invalid syntax" {
+		t.Error("wrong error")
+		t.Error(err.Error.Error())
 	}
 }
