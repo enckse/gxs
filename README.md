@@ -29,6 +29,8 @@ mode is the type of stitch that will be built
 | bottomedge   | back stitch at the bottom edge |
 | leftedge   | back stitch on the left edge |
 | rightedge   | back stitch on the right edge |
+| hline | back stitch horizontally through |
+| vline | back stitch vertically through |
 
 ```
 mode => {
