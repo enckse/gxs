@@ -1,0 +1,4 @@
+include => {
+    examples/include.one
+    examples/include.two
+}

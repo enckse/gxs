@@ -1,0 +1,11 @@
+mode => {
+    te
+}
+pattern => {
+    xxxxx
+    zzzzz
+    xxxxx
+}
+action => {
+    commit
+}

@@ -1,7 +1,7 @@
 BIN      := bin/
 GXS      := $(BIN)gxs
 TESTS    := $(PWD)/internal/
-EXAMPLES := $(shell ls examples/)
+EXAMPLES := $(shell ls examples/ | grep "\.gxs$$")
 
 .PHONY: $(TESTS) $(EXAMPLES)
 

@@ -1,0 +1,16 @@
+palette => {
+    x => red
+    y => #333333
+    z => NONE
+}
+mode => {
+    xs
+}
+pattern => {
+    xyzyz
+    zyxyz
+    zzxzz
+}
+action => {
+    commit
+}
