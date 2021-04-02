@@ -630,7 +630,7 @@ func buildPattern(actions []patternAction) (Pattern, *ParserError) {
 						curColor[action.stitchMode] = []string{}
 					}
 					modeSet := curColor[action.stitchMode]
-					offset := fmt.Sprintf("%dx%d", width+1, height+1)
+					offset := fmt.Sprintf("%d%s%d", width+1, gridLocation, height+1)
 					modeSet = append(modeSet, offset)
 					curColor[action.stitchMode] = modeSet
 					tracking[color] = curColor
