@@ -26,6 +26,7 @@ const (
 	fontSize             = "font-size: 6pt"
 	HTMLMode             = "html"
 	ASCIIMode            = "ascii"
+	asciiSymbols         = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890"
 )
 
 var (
@@ -64,6 +65,15 @@ type (
 		pad     int
 		entries []entry
 		colors  []colorMap
+	}
+	asciiCell struct {
+		top     bool
+		bot     bool
+		left    bool
+		right   bool
+		found   bool
+		value   string
+		entries []entry
 	}
 )
 
@@ -223,10 +233,162 @@ func (p Pattern) ToHTMLPattern() (HTMLPattern, error) {
 	return obj, nil
 }
 
+func (p Pattern) findASCIIEdges(y, x int) asciiCell {
+	obj := asciiCell{}
+	for _, entry := range p.entries {
+		for _, cell := range entry.cells {
+			if cell.x == x && cell.y == y {
+				obj.found = true
+				obj.entries = append(obj.entries, entry)
+				switch entry.mode {
+				case isBottomEdge:
+					obj.bot = true
+				case isTopEdge:
+					obj.top = true
+				case isLeftEdge:
+					obj.left = true
+				case isRightEdge:
+					obj.right = true
+				}
+			}
+		}
+	}
+	return obj
+}
+
+func ascii(p Pattern) ([]byte, error) {
+	size := p.size + 2
+	row := 0
+	var array [][]asciiCell
+	colorMap := make(map[string]string)
+	colorPos := 0
+	for row <= size {
+		col := 0
+		array = append(array, []asciiCell{})
+		for col <= size {
+			self := p.findASCIIEdges(row, col)
+			above := p.findASCIIEdges(row-1, col)
+			below := p.findASCIIEdges(row+1, col)
+			left := p.findASCIIEdges(row, col+1)
+			right := p.findASCIIEdges(row, col-1)
+			self.top = self.top || above.bot
+			self.bot = self.bot || below.top
+			self.right = self.right || left.left
+			self.left = self.left || right.right
+			self.value = " "
+			if self.found {
+				hasHLine := false
+				hasVLine := false
+				hasTLBR := false
+				hasTRBL := false
+				color := ""
+				for _, entry := range self.entries {
+					switch entry.mode {
+					case isTopLeftBottomRight:
+						self.value = "\\"
+						if hasHLine || hasVLine || hasTRBL {
+							return nil, fmt.Errorf("unable to perform tlbr with other line")
+						}
+						hasTLBR = true
+					case isTopRightBottomLeft:
+						self.value = "/"
+						if hasHLine || hasVLine || hasTLBR {
+							return nil, fmt.Errorf("unable to perform trbl with other line")
+						}
+						hasTRBL = true
+					case isHorizontalLine:
+						self.value = "-"
+						if hasTLBR || hasTRBL {
+							return nil, fmt.Errorf("unable to make horizontal line with tlbr/trbl")
+						}
+						hasHLine = true
+					case isVerticalLine:
+						self.value = "|"
+						if hasTLBR || hasTRBL {
+							return nil, fmt.Errorf("unable to make vertical line with tlbr/trbl")
+						}
+						hasVLine = true
+					case isXStitch:
+						color = entry.color
+					}
+				}
+				if hasVLine && hasHLine {
+					self.value = "+"
+				}
+				if !hasVLine && !hasHLine && !hasTLBR && !hasTRBL {
+					if color == "" {
+						return nil, fmt.Errorf("no color found")
+					}
+					symbol := ""
+					if val, ok := colorMap[color]; ok {
+						symbol = val
+					} else {
+						if colorPos < len(asciiSymbols) {
+							symbol = fmt.Sprintf("%c", asciiSymbols[colorPos])
+							colorPos += 1
+						}
+						colorMap[color] = symbol
+					}
+					self.value = symbol
+				}
+			}
+			array[row] = append(array[row], self)
+			col += 1
+		}
+		row += 1
+	}
+
+	var b bytes.Buffer
+	for _, row := range array {
+		b.WriteString("\n")
+		for _, idx := range []int{0, 1} {
+			for _, cell := range row {
+				switch idx {
+				case 0:
+					b.WriteString(".")
+					if cell.top {
+						b.WriteString("-")
+					} else {
+						b.WriteString(" ")
+					}
+				case 1:
+					if cell.left {
+						b.WriteString("|")
+					} else {
+						b.WriteString(" ")
+					}
+					b.WriteString(cell.value)
+				}
+			}
+			if idx == 0 {
+				b.WriteString("\n")
+			}
+		}
+	}
+
+	b.WriteString("\n")
+	b.WriteString("---\n")
+	for k, v := range colorMap {
+		count := 0
+		input := k
+		for _, color := range p.colors {
+			if color.output == k {
+				count = color.count
+				input = color.input
+				break
+			}
+		}
+		b.WriteString(fmt.Sprintf("color: %s => %s (count: %d)\n", v, input, count))
+	}
+	return b.Bytes(), nil
+}
+
 func Build(p Pattern, mode string) ([]byte, error) {
 	switch mode {
 	case HTMLMode:
 		return html(p)
+	case ASCIIMode:
+		return ascii(p)
 	}
 	return nil, fmt.Errorf("unknown mode: %s", mode)
 }
