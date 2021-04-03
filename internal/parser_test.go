@@ -271,6 +271,63 @@ include => {
 }`))
 	if err == nil || err.Error.Error() != "open 1: no such file or directory" {
 		t.Error("wrong error")
+	}
+}
+
+func TestSingleLineParserError(t *testing.T) {
+	_, err := Parse([]byte(`
+action => {
+	commit}
+`))
+	if err == nil || err.Error.Error() != "unclosed block" {
+		t.Error("wrong error")
+	}
+	_, err = Parse([]byte(`
+action => {action => {commit}
+`))
+	if err == nil || err.Error.Error() != "single-line start of block invalid" {
+		t.Error("wrong error")
 		t.Error(err.Error.Error())
+	}
+}
+
+func TestSingleLineParser(t *testing.T) {
+	_, err := Parse([]byte(`
+# allow comments
+palette => {
+	x => NONE
+	y => red
+	z => #231234
+}
+mode => {
+	xstitch
+}
+pattern => {
+	zxxxy
+	xxzyy
+	xxyyy
+
+	xxxxx
+}
+action => {commit}
+palette => {
+	x => NONE
+	y => red
+	r => #231234
+}
+mode => {bottomedge}
+pattern => {
+	xxxxx
+	xrrrr
+	xxxxx
+	r
+}
+offset => {1x2}
+action => {
+	commit
+}
+`))
+	if err != nil {
+		t.Error("is valid")
 	}
 }

@@ -516,12 +516,26 @@ func next(stream []string) (patternBlock, int) {
 			} else {
 				if strings.HasSuffix(line, parserBlockStart) {
 					inBlock = true
-					modeSection := strings.Split(line, parserBlockStart)
-					if len(modeSection) != 2 {
-						return patternBlock{err: fmt.Errorf("invalid start block")}, 0
+					mode, err := getBlockMode(line)
+					if err != nil {
+						return patternBlock{err: err}, 0
 					}
-					block.mode = modeSection[0]
+					block.mode = mode
 				} else {
+					if strings.HasSuffix(line, "}") && strings.Contains(line, parserBlockStart) {
+						sub := line[0 : len(line)-1]
+						parts := strings.Split(sub, parserBlockStart)
+						if len(parts) == 2 {
+							mode, err := getBlockMode(sub)
+							if err != nil {
+								return patternBlock{err: fmt.Errorf("unable to read single line block")}, 0
+							}
+							block.mode = mode
+							block.lines = []string{parts[1]}
+							return block, 1
+						}
+						return patternBlock{err: fmt.Errorf("single-line start of block invalid")}, 0
+					}
 					return patternBlock{err: fmt.Errorf("expected start of block")}, 0
 				}
 			}
@@ -532,6 +546,14 @@ func next(stream []string) (patternBlock, int) {
 		return patternBlock{err: fmt.Errorf("unclosed block")}, 0
 	}
 	return block, idx
+}
+
+func getBlockMode(line string) (string, error) {
+	modeSection := strings.Split(line, parserBlockStart)
+	if len(modeSection) != 2 {
+		return "", fmt.Errorf("invalid start block")
+	}
+	return modeSection[0], nil
 }
 
 func (b patternBlock) isMatch(is string) bool {
