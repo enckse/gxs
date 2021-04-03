@@ -368,6 +368,7 @@ func ascii(p Pattern) ([]byte, error) {
 
 	b.WriteString("\n")
 	b.WriteString("---\n")
+	var legend []string
 	for k, v := range colorMap {
 		count := 0
 		input := k
@@ -378,7 +379,11 @@ func ascii(p Pattern) ([]byte, error) {
 				break
 			}
 		}
-		b.WriteString(fmt.Sprintf("color: %s => %s (count: %d)\n", v, input, count))
+		legend = append(legend, (fmt.Sprintf("color: %s => %s (count: %d)\n", v, input, count)))
+	}
+	sort.Strings(legend)
+	for _, line := range legend {
+		b.WriteString(line)
 	}
 	return b.Bytes(), nil
 }

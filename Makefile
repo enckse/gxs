@@ -19,6 +19,8 @@ example: $(EXAMPLES)
 $(EXAMPLES):
 	$(GXS) -format html -input examples/$@ > $(BIN)$@.html
 	diff -u $(BIN)$@.html expected/$@.html
+	$(GXS) -format ascii -input examples/$@ > $(BIN)$@.ascii
+	diff -u $(BIN)$@.ascii expected/$@.ascii
 
 $(TESTS):
 	go test -v $@

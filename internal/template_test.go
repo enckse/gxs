@@ -59,3 +59,14 @@ func TestHTMLBuild(t *testing.T) {
 		t.Error("invalid building result")
 	}
 }
+
+func TestASCIIBuild(t *testing.T) {
+	j, err := NewPattern(1)
+	if err != nil {
+		t.Error("pattern is valid")
+	}
+	b, err := Build(j, "ascii")
+	if err != nil || len(b) == 0 {
+		t.Error("invalid building result")
+	}
+}
