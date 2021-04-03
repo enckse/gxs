@@ -101,19 +101,15 @@ pattern => {
 action => {
     commit
 }
-# reuse the palette
-mode => {
-    te
-}
+# reuse the palette, single-line block (only for single-line commands)
+mode => {topedge}
 # patterns must always be redefined
 pattern => {
     xxxxx
     zzzzz
     xxxxx
 }
-action => {
-    commit
-}
+action => {commit}
 ```
 
 see `examples/` for more.
