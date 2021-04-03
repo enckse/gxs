@@ -9,7 +9,7 @@ EXPECT   := $(shell find expected -type f)
 
 all: $(GXS) check
 
-check: test example expect
+check: test example options expect
 
 $(GXS): $(shell find cmd/ -type f) $(shell find internal/ -type f)
 	go build -o $(GXS) cmd/main.go
@@ -18,6 +18,9 @@ test: $(TESTS)
 
 example: $(EXAMPLES)
   
+options:
+	cat examples/readme.gxs | $(GXS) -option ascii-no-delimiter=true > $(BIN)nodelimiter.ascii
+
 expect:  $(EXPECT)
 
 $(EXPECT):

@@ -54,7 +54,7 @@ func TestHTMLBuild(t *testing.T) {
 	if err != nil {
 		t.Error("pattern is valid")
 	}
-	b, err := Build(j, "html")
+	b, err := Build(j, "html", &Option{})
 	if err != nil || len(b) == 0 {
 		t.Error("invalid building result")
 	}
@@ -65,7 +65,7 @@ func TestASCIIBuild(t *testing.T) {
 	if err != nil {
 		t.Error("pattern is valid")
 	}
-	b, err := Build(j, "ascii")
+	b, err := Build(j, "ascii", &Option{})
 	if err != nil || len(b) == 0 {
 		t.Error("invalid building result")
 	}

@@ -257,7 +257,7 @@ func (p Pattern) findASCIIEdges(y, x int) asciiCell {
 	return obj
 }
 
-func ascii(p Pattern) ([]byte, error) {
+func ascii(p Pattern, opts *Option) ([]byte, error) {
 	size := p.size + 2
 	row := 0
 	var array [][]asciiCell
@@ -392,7 +392,11 @@ func ascii(p Pattern) ([]byte, error) {
 
 	var b bytes.Buffer
 	for _, line := range reverse(final) {
-		b.WriteString(fmt.Sprintf("%s\n", line))
+		val := line
+		if opts.asciiNoDelimiter {
+			val = strings.Replace(val, asciiSep, " ", -1)
+		}
+		b.WriteString(fmt.Sprintf("%s\n", val))
 	}
 	b.WriteString("\n")
 	b.WriteString("---\n")
@@ -435,12 +439,12 @@ func reverse(array []string) []string {
 	return s
 }
 
-func Build(p Pattern, mode string) ([]byte, error) {
+func Build(p Pattern, mode string, options *Option) ([]byte, error) {
 	switch mode {
 	case HTMLMode:
 		return html(p)
 	case ASCIIMode:
-		return ascii(p)
+		return ascii(p, options)
 	}
 	return nil, fmt.Errorf("unknown mode: %s", mode)
 }

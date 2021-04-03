@@ -34,6 +34,13 @@ func main() {
 	file := flag.String("input", "", "file to take as an input pattern (else stdin)")
 	out := flag.String("output", "", "file to save output (else stdout)")
 	outMode := flag.String("format", internal.ASCIIMode, "output format")
+	option := &internal.Option{}
+	flag.Func("option", "gxs options", func(s string) error {
+		if err := option.Set(s); err != nil {
+			return err
+		}
+		return nil
+	})
 	flag.Parse()
 	fileName := *file
 	var b []byte
@@ -55,7 +62,7 @@ func main() {
 		}
 		die("unable to parse pattern", pErr.Error)
 	}
-	tmpl, err := internal.Build(pattern, *outMode)
+	tmpl, err := internal.Build(pattern, *outMode, option)
 	if err != nil {
 		die("failed to template", err)
 	}
