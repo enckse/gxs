@@ -1,0 +1,35 @@
+palette => {
+    g => green
+    x => red
+    s => blue
+    - => NONE
+}
+mode => {xstitch}
+pattern => {
+    -gggg
+    g
+    g--gg
+    g---g
+    -gggg
+}
+action => {commit}
+mode => {xstitch}
+offset => {6x0}
+pattern => {
+    x---x
+    -x-x
+    --x
+    -x-x
+    x---x
+}
+action => {commit}
+mode => {xstitch}
+offset => {12x0}
+pattern => {
+    -ssss
+    s
+    -sss
+    ----s
+    ssss-
+}
+action => {commit}
