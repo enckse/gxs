@@ -27,6 +27,7 @@ const (
 	HTMLMode             = "html"
 	ASCIIMode            = "ascii"
 	asciiSymbols         = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890"
+	asciiSep             = "."
 )
 
 var (
@@ -351,7 +352,7 @@ func ascii(p Pattern) ([]byte, error) {
 			for _, cell := range row {
 				switch idx {
 				case 0:
-					raw.WriteString(".")
+					raw.WriteString(asciiSep)
 					if cell.top {
 						raw.WriteString("-")
 					} else {
@@ -380,7 +381,7 @@ func ascii(p Pattern) ([]byte, error) {
 			prev = line
 			continue
 		}
-		if strings.TrimSpace(strings.Replace(line, ".", "", -1)) == "" {
+		if strings.TrimSpace(strings.Replace(line, asciiSep, "", -1)) == "" {
 			prev = line
 			continue
 		}
