@@ -24,9 +24,7 @@
 . . . . . . . . . . . . . . 
                c c c c      
 . . . . . . . . . . . . . . 
-                            
-. . . . . . . . . . . . . . 
-                            
+
 ---
 color: a => green (count: 14)
 color: b => red (count: 9)

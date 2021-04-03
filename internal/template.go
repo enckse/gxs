@@ -344,34 +344,55 @@ func ascii(p Pattern) ([]byte, error) {
 		row += 1
 	}
 
-	var b bytes.Buffer
+	var raw bytes.Buffer
 	for _, row := range array {
-		b.WriteString("\n")
+		raw.WriteString("\n")
 		for _, idx := range []int{0, 1} {
 			for _, cell := range row {
 				switch idx {
 				case 0:
-					b.WriteString(".")
+					raw.WriteString(".")
 					if cell.top {
-						b.WriteString("-")
+						raw.WriteString("-")
 					} else {
-						b.WriteString(" ")
+						raw.WriteString(" ")
 					}
 				case 1:
 					if cell.left {
-						b.WriteString("|")
+						raw.WriteString("|")
 					} else {
-						b.WriteString(" ")
+						raw.WriteString(" ")
 					}
-					b.WriteString(cell.value)
+					raw.WriteString(cell.value)
 				}
 			}
 			if idx == 0 {
-				b.WriteString("\n")
+				raw.WriteString("\n")
 			}
 		}
 	}
 
+	lines := reverse(strings.Split(raw.String(), "\n"))
+	var final []string
+	var prev string
+	for idx, line := range lines {
+		if strings.TrimSpace(line) == "" {
+			prev = line
+			continue
+		}
+		if strings.TrimSpace(strings.Replace(line, ".", "", -1)) == "" {
+			prev = line
+			continue
+		}
+		final = append(final, prev)
+		final = append(final, lines[idx:]...)
+		break
+	}
+
+	var b bytes.Buffer
+	for _, line := range reverse(final) {
+		b.WriteString(fmt.Sprintf("%s\n", line))
+	}
 	b.WriteString("\n")
 	b.WriteString("---\n")
 	var legend []string
@@ -403,6 +424,14 @@ func ascii(p Pattern) ([]byte, error) {
 		}
 	}
 	return b.Bytes(), nil
+}
+
+func reverse(array []string) []string {
+	s := array
+	for i, j := 0, len(s)-1; i < j; i, j = i+1, j-1 {
+		s[i], s[j] = s[j], s[i]
+	}
+	return s
 }
 
 func Build(p Pattern, mode string) ([]byte, error) {
