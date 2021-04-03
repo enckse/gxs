@@ -282,6 +282,7 @@ func ascii(p Pattern) ([]byte, error) {
 				hasTLBR := false
 				hasTRBL := false
 				color := ""
+				isStitch := false
 				for _, entry := range self.entries {
 					switch entry.mode {
 					case isTopLeftBottomRight:
@@ -310,12 +311,13 @@ func ascii(p Pattern) ([]byte, error) {
 						hasVLine = true
 					case isXStitch:
 						color = entry.color
+						isStitch = true
 					}
 				}
 				if hasVLine && hasHLine {
 					self.value = "+"
 				}
-				if !hasVLine && !hasHLine && !hasTLBR && !hasTRBL {
+				if isStitch {
 					if color == "" {
 						return nil, fmt.Errorf("no color found")
 					}
