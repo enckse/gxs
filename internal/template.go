@@ -40,6 +40,7 @@ type (
 		Size    int
 		padding string
 		Cells   []Cell
+		Legend  []string
 	}
 	cell struct {
 		x int
@@ -54,6 +55,7 @@ type (
 		size    int
 		pad     int
 		entries []entry
+		legend  []string
 	}
 )
 
@@ -204,6 +206,7 @@ func (p Pattern) ToHTMLPattern() (HTMLPattern, error) {
 		return obj, err
 	}
 	obj.Cells = cells
+	obj.Legend = p.legend
 	return obj, nil
 }
 

@@ -23,6 +23,9 @@
   font-weight: bold;
   background: white;
 }
+.legend {
+    font-size: 6pt;
+}
 .main {
   margin-left: 10px;
   padding: 0px 10px;
@@ -35,6 +38,11 @@
   <div class="grid" id="grid">{{ range $idx, $id := .Cells }}
       <div class="cell" style="{{ $id.Style }}" id="{{ $id.ID }}">{{ $id.Value }}</div>{{ end }}
   </div>
+</div>
+<div class="legend">
+    <br />---<br />
+        {{ range $idx, $legend := .Legend }}{{ $legend }}
+        <br />{{ end }}
 </div>
         </div>
     </body>
