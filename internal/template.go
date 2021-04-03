@@ -5,6 +5,7 @@ import (
 	_ "embed"
 	"fmt"
 	"html/template"
+	"sort"
 	"strings"
 )
 
@@ -53,11 +54,16 @@ type (
 		mode  string
 		color string
 	}
+	colorMap struct {
+		input  string
+		output string
+		count  int
+	}
 	Pattern struct {
 		size    int
 		pad     int
 		entries []entry
-		legend  []string
+		colors  []colorMap
 	}
 )
 
@@ -208,7 +214,12 @@ func (p Pattern) ToHTMLPattern() (HTMLPattern, error) {
 		return obj, err
 	}
 	obj.Cells = cells
-	obj.Legend = p.legend
+	var legend []string
+	for _, mapped := range p.colors {
+		legend = append(legend, fmt.Sprintf("color: %s (count %d)", mapped.input, mapped.count))
+	}
+	sort.Strings(legend)
+	obj.Legend = legend
 	return obj, nil
 }
 

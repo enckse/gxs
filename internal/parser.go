@@ -3,7 +3,6 @@ package internal
 import (
 	"fmt"
 	"os"
-	"sort"
 	"strconv"
 	"strings"
 )
@@ -256,16 +255,16 @@ func buildPattern(actions []patternAction) (Pattern, *ParserError) {
 	if err != nil {
 		return pattern, &ParserError{Error: err}
 	}
-	var legend []string
+	var colorMapping []colorMap
 	for k, v := range colorLegend {
 		if lookup, ok := reverseColors[k]; ok {
-			legend = append(legend, fmt.Sprintf("color: %s (count %d)", lookup, v))
+			mapped := colorMap{input: lookup, output: k, count: v}
+			colorMapping = append(colorMapping, mapped)
 			continue
 		}
 		return pattern, &ParserError{Error: fmt.Errorf("unable to reverse map color")}
 	}
-	sort.Strings(legend)
-	pattern.legend = legend
+	pattern.colors = colorMapping
 	pattern.entries = entries
 	return pattern, nil
 }
