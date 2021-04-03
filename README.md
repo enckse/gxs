@@ -9,6 +9,18 @@ G(o) X(cross) S(titch) is a simple ascii-driven cross stitch pattern builder
 make
 ```
 
+## usage
+
+to produce an html output file
+```
+gxs -input filename -output output.html -format html
+```
+
+to produce an ascii output to stdout from stdin
+```
+cat filename | gxs
+```
+
 ## patterns
 
 `gxs` uses a declaration of patterns which is based on building 1 to N layers
