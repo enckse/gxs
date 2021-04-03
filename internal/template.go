@@ -23,6 +23,8 @@ const (
 	hLineSymbol          = "---"
 	hLinePartial         = "-"
 	fontSize             = "font-size: 6pt"
+	HTMLMode             = "html"
+	ASCIIMode            = "ascii"
 )
 
 var (
@@ -210,7 +212,15 @@ func (p Pattern) ToHTMLPattern() (HTMLPattern, error) {
 	return obj, nil
 }
 
-func Build(p Pattern) ([]byte, error) {
+func Build(p Pattern, mode string) ([]byte, error) {
+	switch mode {
+	case HTMLMode:
+		return html(p)
+	}
+	return nil, fmt.Errorf("unknown mode: %s", mode)
+}
+
+func html(p Pattern) ([]byte, error) {
 	obj, err := p.ToHTMLPattern()
 	if err != nil {
 		return nil, err

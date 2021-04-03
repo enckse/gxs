@@ -33,6 +33,7 @@ func stdin() []byte {
 func main() {
 	file := flag.String("input", "", "file to take as an input pattern (else stdin)")
 	out := flag.String("output", "", "file to save output (else stdout)")
+	outMode := flag.String("format", internal.ASCIIMode, "output format")
 	flag.Parse()
 	fileName := *file
 	var b []byte
@@ -54,7 +55,7 @@ func main() {
 		}
 		die("unable to parse pattern", pErr.Error)
 	}
-	tmpl, err := internal.Build(pattern)
+	tmpl, err := internal.Build(pattern, *outMode)
 	if err != nil {
 		die("failed to template", err)
 	}

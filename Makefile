@@ -17,7 +17,7 @@ test: $(TESTS)
 example: $(EXAMPLES)
 
 $(EXAMPLES):
-	$(GXS) -input examples/$@ > $(BIN)$@.html
+	$(GXS) -format html -input examples/$@ > $(BIN)$@.html
 	diff -u $(BIN)$@.html expected/$@.html
 
 $(TESTS):
