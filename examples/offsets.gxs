@@ -1,0 +1,52 @@
+# comments start with '#' but can NOT be within a '{' and '}' block
+palette => {
+    x => red
+    y => #333333
+    z => NONE
+}
+mode => {
+    hline
+}
+pattern => {
+    xyzyz
+    zyxyz
+    zzxzz
+}
+action => {
+    commit
+}
+offset => {
+    10x10
+}
+# reuse the palette
+mode => {
+    vline
+}
+# patterns must always be redefined
+pattern => {
+    xxxxx
+    zzzzz
+    xyxyx
+}
+action => {
+    commit
+}
+offset => {
+    3x1
+}
+palette => {
+    x => orange
+    y => pink
+    z => NONE
+}
+mode => {
+    xstitch
+}
+pattern => {
+    xyzyz
+    zyxyz
+    zzxzz
+}
+action => {
+    commit
+}
