@@ -9,17 +9,20 @@ import (
 )
 
 const (
-	gridLocation     = "x"
-	isBottomEdge     = "bottomedge"
-	isTopEdge        = "topedge"
-	isRightEdge      = "rightedge"
-	isLeftEdge       = "leftedge"
-	isXStitch        = "xstitch"
-	isHorizontalLine = "hline"
-	isVerticalLine   = "vline"
-	vLineSymbol      = "|"
-	hLineSymbol      = "-----"
-	hLinePartial     = "--"
+	gridLocation         = "x"
+	isBottomEdge         = "bottomedge"
+	isTopEdge            = "topedge"
+	isRightEdge          = "rightedge"
+	isLeftEdge           = "leftedge"
+	isXStitch            = "xstitch"
+	isTopLeftBottomRight = "topleftbottomright"
+	isTopRightBottomLeft = "toprightbottomleft"
+	isHorizontalLine     = "hline"
+	isVerticalLine       = "vline"
+	vLineSymbol          = "|"
+	hLineSymbol          = "---"
+	hLinePartial         = "-"
+	fontSize             = "font-size: 6pt"
 )
 
 var (
@@ -70,7 +73,7 @@ func (o HTMLPattern) pad(val int) string {
 	return padded
 }
 
-func (o HTMLPattern) initCells(j Pattern) []Cell {
+func (o HTMLPattern) initCells(j Pattern) ([]Cell, error) {
 	var results []Cell
 	x := 0
 	for x < o.Size {
@@ -89,7 +92,10 @@ func (o HTMLPattern) initCells(j Pattern) []Cell {
 			cell := Cell{}
 			cell.ID = o.newID(y, x)
 			cell.Value = template.HTML(val)
-			style, hvLine := j.layout(y, x)
+			style, hvLine, err := j.layout(y, x)
+			if err != nil {
+				return results, err
+			}
 			cell.Style = template.CSS(style)
 			if hvLine != "" {
 				cell.Value = template.HTML(hvLine)
@@ -99,7 +105,7 @@ func (o HTMLPattern) initCells(j Pattern) []Cell {
 		}
 		x += 1
 	}
-	return results
+	return results, nil
 }
 
 func (o HTMLPattern) newID(x, y int) string {
@@ -108,10 +114,12 @@ func (o HTMLPattern) newID(x, y int) string {
 	return fmt.Sprintf("%s%s%s", left, gridLocation, right)
 }
 
-func (p Pattern) layout(x, y int) (string, string) {
+func (p Pattern) layout(x, y int) (string, string, error) {
 	var style []string
 	vLineColor := ""
 	hLineColor := ""
+	tlbrColor := ""
+	trblColor := ""
 	for _, e := range p.entries {
 		for _, c := range e.cells {
 			if c.x == x && c.y == y {
@@ -119,8 +127,16 @@ func (p Pattern) layout(x, y int) (string, string) {
 				switch e.mode {
 				case isVerticalLine:
 					vLineColor = e.color
+					style = append(style, fontSize)
 				case isHorizontalLine:
 					hLineColor = e.color
+					style = append(style, fontSize)
+				case isTopLeftBottomRight:
+					tlbrColor = e.color
+					style = append(style, fontSize)
+				case isTopRightBottomLeft:
+					trblColor = e.color
+					style = append(style, fontSize)
 				case isBottomEdge:
 					s = "border-bottom-style: solid; border-bottom-color: "
 				case isTopEdge:
@@ -139,25 +155,43 @@ func (p Pattern) layout(x, y int) (string, string) {
 		}
 	}
 	sub := ""
-	if vLineColor != "" {
-		sub = colorLine(vLineSymbol, vLineColor)
-	}
-	if hLineColor != "" {
-		if sub == "" {
-			sub = colorLine(hLineSymbol, hLineColor)
-		} else {
-			hSub := colorLine(hLinePartial, hLineColor)
-			sub = fmt.Sprintf("%s%s%s", hSub, colorLine(vLineSymbol, vLineColor), hSub)
+	hadHVLine := vLineColor != "" || hLineColor != ""
+	if hadHVLine {
+		if vLineColor != "" {
+			sub = colorLine(vLineSymbol, vLineColor)
+		}
+		if hLineColor != "" {
+			if sub == "" {
+				sub = colorLine(hLineSymbol, hLineColor)
+			} else {
+				hSub := colorLine(hLinePartial, hLineColor)
+				sub = fmt.Sprintf("%s%s%s", hSub, colorLine(vLineSymbol, vLineColor), hSub)
+			}
 		}
 	}
-	return strings.Join(style, ";"), sub
+	hadXLine := tlbrColor != "" || trblColor != ""
+	if hadXLine {
+		if hadHVLine {
+			return "", "", fmt.Errorf("unable to do horizontal/vertical line with cross line")
+		}
+		if tlbrColor != "" && trblColor != "" {
+			return "", "", fmt.Errorf("perform a cross stitch, not 2 different lines")
+		}
+		if tlbrColor != "" {
+			sub = colorLine("\\", tlbrColor)
+		}
+		if trblColor != "" {
+			sub = colorLine("/", trblColor)
+		}
+	}
+	return strings.Join(style, ";"), sub, nil
 }
 
 func colorLine(symbol, color string) string {
 	return fmt.Sprintf("<div style=\"color: %s\">%s</div>", color, symbol)
 }
 
-func (p Pattern) ToHTMLPattern() HTMLPattern {
+func (p Pattern) ToHTMLPattern() (HTMLPattern, error) {
 	padString := ""
 	padding := p.pad
 	for padding > 0 {
@@ -165,12 +199,19 @@ func (p Pattern) ToHTMLPattern() HTMLPattern {
 		padding = padding - 1
 	}
 	obj := HTMLPattern{Size: p.size + 1, padding: padString}
-	obj.Cells = obj.initCells(p)
-	return obj
+	cells, err := obj.initCells(p)
+	if err != nil {
+		return obj, err
+	}
+	obj.Cells = cells
+	return obj, nil
 }
 
 func Build(p Pattern) ([]byte, error) {
-	obj := p.ToHTMLPattern()
+	obj, err := p.ToHTMLPattern()
+	if err != nil {
+		return nil, err
+	}
 	tmpl, err := template.New("t").Parse(templateHTML)
 	if err != nil {
 		return nil, err

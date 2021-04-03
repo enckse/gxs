@@ -603,7 +603,7 @@ func parseBlocks(blocks []patternBlock) ([]patternAction, *ParserError) {
 				return nil, block.toError("no pattern")
 			}
 			switch action.stitchMode {
-			case isLeftEdge, isRightEdge, isTopEdge, isBottomEdge, isXStitch, isHorizontalLine, isVerticalLine:
+			case isLeftEdge, isRightEdge, isTopEdge, isBottomEdge, isXStitch, isHorizontalLine, isVerticalLine, isTopLeftBottomRight, isTopRightBottomLeft:
 				break
 			default:
 				return nil, block.toError("invalid stitch mode")

@@ -31,8 +31,8 @@ func TestToPattern(t *testing.T) {
 	if err != nil {
 		t.Error("valid JSON result")
 	}
-	pattern := j.ToHTMLPattern()
-	if pattern.Size != 3 {
+	pattern, err := j.ToHTMLPattern()
+	if err != nil || pattern.Size != 3 {
 		t.Error("invalid conversion")
 	}
 	if len(pattern.Cells) != 9 {
