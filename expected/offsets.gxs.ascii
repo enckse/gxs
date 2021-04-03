@@ -38,3 +38,4 @@
 ---
 color: a => orange (count: 3)
 color: b => pink (count: 4)
+WARN: cannot have stitch+line in ASCII pattern [1]

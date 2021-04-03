@@ -262,6 +262,7 @@ func ascii(p Pattern) ([]byte, error) {
 	var array [][]asciiCell
 	colorMap := make(map[string]string)
 	colorPos := 0
+	var warnings []string
 	for row <= size {
 		col := 0
 		array = append(array, []asciiCell{})
@@ -320,6 +321,9 @@ func ascii(p Pattern) ([]byte, error) {
 				if isStitch {
 					if color == "" {
 						return nil, fmt.Errorf("no color found")
+					}
+					if self.value != " " {
+						warnings = append(warnings, "cannot have stitch+line in ASCII pattern")
 					}
 					symbol := ""
 					if val, ok := colorMap[color]; ok {
@@ -386,6 +390,17 @@ func ascii(p Pattern) ([]byte, error) {
 	sort.Strings(legend)
 	for _, line := range legend {
 		b.WriteString(line)
+	}
+	sort.Strings(warnings)
+	tracked := make(map[string]int)
+	for _, warning := range warnings {
+		tracked[warning] += 1
+	}
+	for _, warning := range warnings {
+		if count, ok := tracked[warning]; ok {
+			b.WriteString(fmt.Sprintf("WARN: %s [%d]\n", warning, count))
+			delete(tracked, warning)
+		}
 	}
 	return b.Bytes(), nil
 }
