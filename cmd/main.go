@@ -14,7 +14,7 @@ import (
 func die(message string, err error) {
 	fmt.Fprintln(os.Stderr, message)
 	fmt.Fprintln(os.Stderr, err)
-	panic("failed")
+	os.Exit(1)
 }
 
 func stdin() []byte {

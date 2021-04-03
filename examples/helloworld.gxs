@@ -1,0 +1,121 @@
+palette => {
+    b => black
+    - => NONE
+}
+mode => {xstitch}
+pattern => {
+    -b-b-bbb-b---b----b-
+    -bbb-b---b---b---b-b
+    -b-b-bbb-bbb-bbb--b
+}
+action => {commit}
+palette => {
+    b => grey
+    - => NONE
+}
+mode => {topedge}
+pattern => {
+    -b-b-bbb-b---b----b
+    --b
+    ------bb--bb--bb--b
+}
+action => {commit}
+mode => {bottomedge}
+pattern => {
+    ------bb----------b
+    --b
+    -b-b-bbb-bbb-bbb--b
+}
+action => {commit}
+mode => {rightedge}
+pattern => {
+    -b-b---b-b---b
+    ---b-b---b---b---b-b
+    -b-b---b---b---b
+}
+action => {commit}
+mode => {leftedge}
+pattern => {
+    -b-b-b---b---b
+    -b---b---b---b---b-b
+    -b-b-b---b---b
+}
+action => {commit}
+mode => {tlbrline}
+pattern => {
+    -------------------b
+    -------------------
+    -----------------b
+}
+action => {commit}
+mode => {trblline}
+pattern => {
+    -----------------b
+    -------------------
+    -------------------b
+}
+action => {commit}
+mode => {hline}
+pattern => {
+    -
+    ------bb
+}
+action => {commit}
+palette => {
+    b => red
+    - => NONE
+}
+offset => {4x4}
+mode => {xstitch}
+pattern => {
+    -----b--b---b---bb
+    -b--b-b-b---b---b-b
+    b-b--b--b---bbb-bb
+}
+action => {commit}
+palette => {
+    b => pink
+    - => NONE
+}
+mode => {leftedge}
+pattern => {
+    b-------b---b---b
+    b---b-b-b---b---b-b
+    b-b-----b---b---b
+}
+action => {commit}
+mode => {rightedge}
+pattern => {
+    --b-----b---b
+    --b-b-b-b---b---b-b
+    b-b-----b-----b
+}
+action => {commit}
+mode => {topedge}
+pattern => {
+    -----b--bb--b---bb
+    -b
+    -----b-------bb--b
+}
+action => {commit}
+mode => {bottomedge}
+pattern => {
+    -----b-----------b
+    -b-------b
+    b-b--b--b---bbb-bb
+}
+action => {commit}
+mode => {tlbrline}
+pattern => {
+    ------b---b-------b
+    --b
+    ----b-----b
+}
+action => {commit}
+mode => {trblline}
+pattern => {
+    ----b
+    b---------b
+    ------b-----------b
+}
+action => {commit}
