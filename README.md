@@ -31,6 +31,8 @@ mode is the type of stitch that will be built
 | rightedge   | back stitch on the right edge |
 | hline | back stitch horizontally through |
 | vline | back stitch vertically through |
+| tlbrline | back stitch top-left to bottom-right through |
+| trblline | back stitch top-right to bottom-left through |
 
 ```
 mode => {
