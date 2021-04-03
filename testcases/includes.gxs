@@ -1,0 +1,4 @@
+include => {
+    testcases/include.one
+    testcases/include.two
+}

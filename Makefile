@@ -1,11 +1,11 @@
 BIN      := bin/
 GXS      := $(BIN)gxs
 TESTS    := $(PWD)/internal/
-EXAMPLES := $(shell ls examples/ | grep "\.gxs$$")
+CASES    := $(shell ls examples/*.gxs) $(shell ls testcases/*.gxs)
 FORMATS  := html ascii
 EXPECT   := $(shell find expected -type f)
 
-.PHONY: $(TESTS) $(EXAMPLES) $(EXPECT)
+.PHONY: $(TESTS) $(CASES) $(EXPECT)
 
 all: $(GXS) check
 
@@ -16,18 +16,18 @@ $(GXS): $(shell find cmd/ -type f) $(shell find internal/ -type f)
 
 test: $(TESTS)
 
-example: $(EXAMPLES)
+example: $(CASES)
   
 options:
-	cat examples/readme.gxs | $(GXS) -option ascii-no-delimiter=true > $(BIN)nodelimiter.ascii
+	cat testcases/readme.gxs | $(GXS) -option ascii-no-delimiter=true > $(BIN)nodelimiter.ascii
 
 expect:  $(EXPECT)
 
 $(EXPECT):
 	diff -u $@ $(BIN)$(shell basename $@)
 
-$(EXAMPLES):
-	for f in $(FORMATS); do $(GXS) -format $$f -input examples/$@ > $(BIN)$@.$$f; done
+$(CASES):
+	for f in $(FORMATS); do $(GXS) -format $$f -input $@ > $(BIN)$(shell basename $@).$$f; done
 
 $(TESTS):
 	go test -v $@
