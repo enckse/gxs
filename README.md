@@ -126,4 +126,4 @@ pattern => {
 action => {commit}
 ```
 
-see `examples/` for more (or even the `testcases/`).
+see `examples/` for more (or even the `tests/inputs/`).
