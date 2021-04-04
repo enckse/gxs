@@ -1,9 +1,9 @@
 BIN      := bin/
 GXS      := $(BIN)gxs
 TESTS    := $(PWD)/internal/
-CASES    := $(shell ls examples/*.gxs) $(shell ls testcases/*.gxs)
+CASES    := $(shell ls examples/*.gxs) $(shell ls tests/inputs/*.gxs)
 FORMATS  := html ascii
-EXPECT   := $(shell find expected -type f)
+EXPECT   := $(shell find tests/outputs -type f)
 
 .PHONY: $(TESTS) $(CASES) $(EXPECT)
 
@@ -19,7 +19,7 @@ test: $(TESTS)
 example: $(CASES)
   
 options:
-	cat testcases/readme.gxs | $(GXS) -option ascii-no-delimiter=true > $(BIN)nodelimiter.ascii
+	cat tests/inputs/readme.gxs | $(GXS) -option ascii-no-delimiter=true > $(BIN)nodelimiter.ascii
 
 expect:  $(EXPECT)
 
