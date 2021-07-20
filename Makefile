@@ -1,6 +1,7 @@
 BIN      := bin/
 GXS      := $(BIN)gxs
 TESTS    := $(PWD)/internal/
+FLAGS    := -trimpath -buildmode=pie -mod=readonly -modcacherw
 CASES    := $(shell ls examples/*.gxs) $(shell ls tests/inputs/*.gxs)
 FORMATS  := html ascii
 EXPECT   := $(shell find tests/outputs -type f)
@@ -12,7 +13,7 @@ all: $(GXS) check
 check: test example options expect
 
 $(GXS): $(shell find cmd/ -type f) $(shell find internal/ -type f)
-	go build -o $(GXS) cmd/main.go
+	go build -o $(GXS) $(FLAGS) cmd/main.go
 
 test: $(TESTS)
 
