@@ -1,33 +1,34 @@
-package internal
+package internal_test
 
 import (
-	"fmt"
 	"html/template"
 	"testing"
+
+	"voidedtech.com/gxs/internal"
 )
 
 func TestNewPattern(t *testing.T) {
-	_, err := NewPattern(0)
+	_, err := internal.NewPattern(0)
 	if err == nil {
 		t.Error("invalid request, size is invalid")
 	}
-	_, err = NewPattern(1)
+	_, err = internal.NewPattern(1)
 	if err != nil {
 		t.Error("valid JSON result")
 	}
 }
 
-func testCell(cell Cell, expectedID, expectedValue string, t *testing.T) {
+func checkCell(t *testing.T, cell internal.Cell, expectedID, expectedValue string) {
 	if cell.ID != expectedID {
-		t.Error(fmt.Sprintf("%s != %s", cell.ID, expectedID))
+		t.Errorf("%s != %s", cell.ID, expectedID)
 	}
 	if cell.Value != template.HTML(expectedValue) {
-		t.Error(fmt.Sprintf("%s != %s", cell.Value, expectedValue))
+		t.Errorf("%s != %s", cell.Value, expectedValue)
 	}
 }
 
 func TestToHTMLPattern(t *testing.T) {
-	j, err := NewPattern(2)
+	j, err := internal.NewPattern(2)
 	if err != nil {
 		t.Error("valid JSON result")
 	}
@@ -38,34 +39,34 @@ func TestToHTMLPattern(t *testing.T) {
 	if len(pattern.Cells) != 9 {
 		t.Error("invalid cells")
 	}
-	testCell(pattern.Cells[0], "000x000", "", t)
-	testCell(pattern.Cells[1], "001x000", "1", t)
-	testCell(pattern.Cells[2], "002x000", "2", t)
-	testCell(pattern.Cells[3], "000x001", "1", t)
-	testCell(pattern.Cells[4], "001x001", "", t)
-	testCell(pattern.Cells[5], "002x001", "", t)
-	testCell(pattern.Cells[6], "000x002", "2", t)
-	testCell(pattern.Cells[7], "001x002", "", t)
-	testCell(pattern.Cells[8], "002x002", "", t)
+	checkCell(t, pattern.Cells[0], "000x000", "")
+	checkCell(t, pattern.Cells[1], "001x000", "1")
+	checkCell(t, pattern.Cells[2], "002x000", "2")
+	checkCell(t, pattern.Cells[3], "000x001", "1")
+	checkCell(t, pattern.Cells[4], "001x001", "")
+	checkCell(t, pattern.Cells[5], "002x001", "")
+	checkCell(t, pattern.Cells[6], "000x002", "2")
+	checkCell(t, pattern.Cells[7], "001x002", "")
+	checkCell(t, pattern.Cells[8], "002x002", "")
 }
 
 func TestHTMLBuild(t *testing.T) {
-	j, err := NewPattern(1)
+	j, err := internal.NewPattern(1)
 	if err != nil {
 		t.Error("pattern is valid")
 	}
-	b, err := Build(j, "html", &Option{})
+	b, err := internal.Build(j, "html", &internal.Option{})
 	if err != nil || len(b) == 0 {
 		t.Error("invalid building result")
 	}
 }
 
 func TestASCIIBuild(t *testing.T) {
-	j, err := NewPattern(1)
+	j, err := internal.NewPattern(1)
 	if err != nil {
 		t.Error("pattern is valid")
 	}
-	b, err := Build(j, "ascii", &Option{})
+	b, err := internal.Build(j, "ascii", &internal.Option{})
 	if err != nil || len(b) == 0 {
 		t.Error("invalid building result")
 	}

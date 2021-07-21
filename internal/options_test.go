@@ -1,11 +1,13 @@
-package internal
+package internal_test
 
 import (
 	"testing"
+
+	"voidedtech.com/gxs/internal"
 )
 
 func TestSetInvalid(t *testing.T) {
-	o := &Option{}
+	o := &internal.Option{}
 	err := o.Set("a=x=y")
 	if err == nil || err.Error() != "invalid key=value pair" {
 		t.Error("is invalid")
@@ -21,13 +23,13 @@ func TestSetInvalid(t *testing.T) {
 }
 
 func TestSetASCIIDelimiter(t *testing.T) {
-	o := &Option{}
+	o := &internal.Option{}
 	err := o.Set("ascii-no-delimiter=true")
-	if err != nil || !o.asciiNoDelimiter {
+	if err != nil || !o.NoDelimiterASCII() {
 		t.Error("valid")
 	}
 	err = o.Set("ascii-no-delimiter=false")
-	if err != nil || o.asciiNoDelimiter {
+	if err != nil || o.NoDelimiterASCII() {
 		t.Error("valid")
 	}
 }

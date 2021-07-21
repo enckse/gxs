@@ -24,10 +24,12 @@ const (
 	hLineSymbol          = "---"
 	hLinePartial         = "-"
 	fontSize             = "font-size: 6pt"
-	HTMLMode             = "html"
-	ASCIIMode            = "ascii"
-	asciiSymbols         = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890"
-	asciiSep             = "."
+	// HTMLMode indicates html output.
+	HTMLMode = "html"
+	// ASCIIMode indicates ascii output.
+	ASCIIMode    = "ascii"
+	asciiSymbols = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890"
+	asciiSep     = "."
 )
 
 var (
@@ -36,11 +38,13 @@ var (
 )
 
 type (
+	// Cell is a single HTML template.
 	Cell struct {
 		ID    string
 		Value template.HTML
 		Style template.CSS
 	}
+	// HTMLPattern is the whole HTML pattern.
 	HTMLPattern struct {
 		Size    int
 		padding string
@@ -61,6 +65,7 @@ type (
 		output string
 		count  int
 	}
+	// Pattern is a backing pattern object.
 	Pattern struct {
 		size    int
 		pad     int
@@ -78,9 +83,15 @@ type (
 	}
 )
 
+// NewTemplateError creates a new templating error.
+func NewTemplateError(message string) error {
+	return NewGXSError("template", message)
+}
+
+// NewPattern creates a new, initialized pattern.
 func NewPattern(size int) (Pattern, error) {
 	if size < 1 {
-		return Pattern{}, fmt.Errorf("invalid size <= 0")
+		return Pattern{}, NewTemplateError("invalid size <= 0")
 	}
 	padding := len(fmt.Sprintf("%d", size)) + 2
 	return Pattern{pad: padding, size: size}, nil
@@ -122,9 +133,9 @@ func (o HTMLPattern) initCells(j Pattern) ([]Cell, error) {
 				cell.Value = template.HTML(hvLine)
 			}
 			results = append(results, cell)
-			y += 1
+			y++
 		}
-		x += 1
+		x++
 	}
 	return results, nil
 }
@@ -193,10 +204,10 @@ func (p Pattern) layout(x, y int) (string, string, error) {
 	hadXLine := tlbrColor != "" || trblColor != ""
 	if hadXLine {
 		if hadHVLine {
-			return "", "", fmt.Errorf("unable to do horizontal/vertical line with cross line")
+			return "", "", NewTemplateError("unable to do horizontal/vertical line with cross line")
 		}
 		if tlbrColor != "" && trblColor != "" {
-			return "", "", fmt.Errorf("perform a cross stitch, not 2 different lines")
+			return "", "", NewTemplateError("perform a cross stitch, not 2 different lines")
 		}
 		if tlbrColor != "" {
 			sub = colorLine("\\", tlbrColor)
@@ -212,12 +223,13 @@ func colorLine(symbol, color string) string {
 	return fmt.Sprintf("<div style=\"color: %s\">%s</div>", color, symbol)
 }
 
+// ToHTMLPattern creates an HTML pattern.
 func (p Pattern) ToHTMLPattern() (HTMLPattern, error) {
 	padString := ""
 	padding := p.pad
 	for padding > 0 {
 		padString = fmt.Sprintf("0%s", padString)
-		padding = padding - 1
+		padding--
 	}
 	obj := HTMLPattern{Size: p.size + 1, padding: padString}
 	cells, err := obj.initCells(p)
@@ -290,25 +302,25 @@ func ascii(p Pattern, opts *Option) ([]byte, error) {
 					case isTopLeftBottomRight:
 						self.value = "\\"
 						if hasHLine || hasVLine || hasTRBL {
-							return nil, fmt.Errorf("unable to perform tlbr with other line")
+							return nil, NewTemplateError("unable to perform tlbr with other line")
 						}
 						hasTLBR = true
 					case isTopRightBottomLeft:
 						self.value = "/"
 						if hasHLine || hasVLine || hasTLBR {
-							return nil, fmt.Errorf("unable to perform trbl with other line")
+							return nil, NewTemplateError("unable to perform trbl with other line")
 						}
 						hasTRBL = true
 					case isHorizontalLine:
 						self.value = "-"
 						if hasTLBR || hasTRBL {
-							return nil, fmt.Errorf("unable to make horizontal line with tlbr/trbl")
+							return nil, NewTemplateError("unable to make horizontal line with tlbr/trbl")
 						}
 						hasHLine = true
 					case isVerticalLine:
 						self.value = "|"
 						if hasTLBR || hasTRBL {
-							return nil, fmt.Errorf("unable to make vertical line with tlbr/trbl")
+							return nil, NewTemplateError("unable to make vertical line with tlbr/trbl")
 						}
 						hasVLine = true
 					case isXStitch:
@@ -321,7 +333,7 @@ func ascii(p Pattern, opts *Option) ([]byte, error) {
 				}
 				if isStitch {
 					if color == "" {
-						return nil, fmt.Errorf("no color found")
+						return nil, NewTemplateError("no color found")
 					}
 					if self.value != " " {
 						warnings = append(warnings, "cannot have stitch+line in ASCII pattern")
@@ -332,7 +344,7 @@ func ascii(p Pattern, opts *Option) ([]byte, error) {
 					} else {
 						if colorPos < len(asciiSymbols) {
 							symbol = fmt.Sprintf("%c", asciiSymbols[colorPos])
-							colorPos += 1
+							colorPos++
 						}
 						colorMap[color] = symbol
 					}
@@ -340,9 +352,9 @@ func ascii(p Pattern, opts *Option) ([]byte, error) {
 				}
 			}
 			array[row] = append(array[row], self)
-			col += 1
+			col++
 		}
-		row += 1
+		row++
 	}
 
 	var raw bytes.Buffer
@@ -381,7 +393,7 @@ func ascii(p Pattern, opts *Option) ([]byte, error) {
 			prev = line
 			continue
 		}
-		if strings.TrimSpace(strings.Replace(line, asciiSep, "", -1)) == "" {
+		if strings.TrimSpace(strings.ReplaceAll(line, asciiSep, "")) == "" {
 			prev = line
 			continue
 		}
@@ -394,7 +406,7 @@ func ascii(p Pattern, opts *Option) ([]byte, error) {
 	for _, line := range reverse(final) {
 		val := line
 		if opts.asciiNoDelimiter {
-			val = strings.Replace(val, asciiSep, " ", -1)
+			val = strings.ReplaceAll(val, asciiSep, " ")
 		}
 		b.WriteString(fmt.Sprintf("%s\n", val))
 	}
@@ -420,7 +432,7 @@ func ascii(p Pattern, opts *Option) ([]byte, error) {
 	sort.Strings(warnings)
 	tracked := make(map[string]int)
 	for _, warning := range warnings {
-		tracked[warning] += 1
+		tracked[warning]++
 	}
 	for _, warning := range warnings {
 		if count, ok := tracked[warning]; ok {
@@ -439,6 +451,7 @@ func reverse(array []string) []string {
 	return s
 }
 
+// Build will create the necessary templated output.
 func Build(p Pattern, mode string, options *Option) ([]byte, error) {
 	switch mode {
 	case HTMLMode:
@@ -446,7 +459,7 @@ func Build(p Pattern, mode string, options *Option) ([]byte, error) {
 	case ASCIIMode:
 		return ascii(p, options)
 	}
-	return nil, fmt.Errorf("unknown mode: %s", mode)
+	return nil, NewTemplateError(fmt.Sprintf("unknown mode: %s", mode))
 }
 
 func html(p Pattern) ([]byte, error) {

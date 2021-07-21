@@ -1,31 +1,41 @@
 package internal
 
 import (
-	"fmt"
 	"strings"
 )
 
 type (
+	// Option are CLI argument options.
 	Option struct {
 		asciiNoDelimiter bool
 	}
 )
 
+// NoDelimiterASCII indicates if the ascii delimiter setting is on.
+func (o Option) NoDelimiterASCII() bool {
+	return o.asciiNoDelimiter
+}
+
 func toBool(s string) (bool, error) {
 	if s == "true" {
 		return true, nil
-	} else {
-		if s == "false" {
-			return false, nil
-		}
 	}
-	return false, fmt.Errorf("invalid boolean value")
+	if s == "false" {
+		return false, nil
+	}
+	return false, NewOptionsError("invalid boolean value")
 }
 
+// NewOptionsError will create a new options-based error.
+func NewOptionsError(message string) error {
+	return NewGXSError("options", message)
+}
+
+// Set will set a CLI key=value property.
 func (o *Option) Set(value string) error {
 	parts := strings.Split(value, "=")
 	if len(parts) != 2 {
-		return fmt.Errorf("invalid key=value pair")
+		return NewOptionsError("invalid key=value pair")
 	}
 	switch parts[0] {
 	case "ascii-no-delimiter":
@@ -35,7 +45,7 @@ func (o *Option) Set(value string) error {
 		}
 		o.asciiNoDelimiter = b
 	default:
-		return fmt.Errorf("unknown option")
+		return NewOptionsError("unknown option")
 	}
 	return nil
 }

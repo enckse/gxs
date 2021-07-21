@@ -42,9 +42,8 @@ func main() {
 		return nil
 	})
 	flag.Parse()
-	fileName := *file
 	var b []byte
-	if fileName == "" {
+	if fileName := *file; fileName == "" {
 		b = stdin()
 	} else {
 		raw, err := os.ReadFile(fileName)
