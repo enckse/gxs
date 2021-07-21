@@ -8,7 +8,7 @@ import (
 
 func TestNoBlocks(t *testing.T) {
 	_, err := internal.Parse([]byte(""))
-	if err == nil || err.Error.Error() != "no blocks found" {
+	if err == nil || err.Error.Error() != "parsing: no blocks found" {
 		t.Error("wrong error")
 	}
 	_, err = internal.Parse([]byte(`
@@ -16,7 +16,7 @@ func TestNoBlocks(t *testing.T) {
 
 
 `))
-	if err == nil || err.Error.Error() != "no blocks found" {
+	if err == nil || err.Error.Error() != "parsing: no blocks found" {
 		t.Error("wrong error")
 	}
 }
@@ -24,7 +24,7 @@ func TestNoBlocks(t *testing.T) {
 func TestUnclosedBlock(t *testing.T) {
 	_, err := internal.Parse([]byte(`
 myblock => {`))
-	if err == nil || err.Error.Error() != "unclosed block" {
+	if err == nil || err.Error.Error() != "parsing: unclosed block at block: 1" {
 		t.Error("wrong error")
 	}
 }
@@ -32,12 +32,12 @@ myblock => {`))
 func TestExpectStart(t *testing.T) {
 	_, err := internal.Parse([]byte(`
 myblock`))
-	if err == nil || err.Error.Error() != "expected start of block" {
+	if err == nil || err.Error.Error() != "parsing: expected start of block" {
 		t.Error("wrong error")
 	}
 	_, err = internal.Parse([]byte(`
 myblock => { => {`))
-	if err == nil || err.Error.Error() != "invalid start block" {
+	if err == nil || err.Error.Error() != "parsing: invalid start block" {
 		t.Error("wrong error")
 	}
 }
@@ -47,7 +47,7 @@ func TestEmptyBlock(t *testing.T) {
 myblock => {
 }
 `))
-	if err == nil || err.Error.Error() != "empty block found" {
+	if err == nil || err.Error.Error() != "parsing: empty block found" {
 		t.Error("wrong error")
 	}
 }
@@ -56,7 +56,7 @@ func TestUnknownAction(t *testing.T) {
 	_, err := internal.Parse([]byte(`action => {
 		save
 }`))
-	if err == nil || err.Error.Error() != "unknown action" {
+	if err == nil || err.Error.Error() != "parsing: unknown action" {
 		t.Error("wrong error")
 	}
 }
@@ -65,7 +65,7 @@ func TestUnknownMode(t *testing.T) {
 	_, err := internal.Parse([]byte(`actions => {
 		commit
 }`))
-	if err == nil || err.Error.Error() != "unknown mode in block" {
+	if err == nil || err.Error.Error() != "parsing: unknown mode in block" {
 		t.Error("wrong error")
 	}
 }
@@ -74,7 +74,7 @@ func TestNoPattern(t *testing.T) {
 	_, err := internal.Parse([]byte(`action => {
 		commit
 }`))
-	if err == nil || err.Error.Error() != "no pattern" {
+	if err == nil || err.Error.Error() != "parsing: no pattern" {
 		t.Error("wrong error")
 	}
 }
@@ -90,7 +90,7 @@ pattern => {
 action => {
 		commit
 }`))
-	if err == nil || err.Error.Error() != "pattern not committed" {
+	if err == nil || err.Error.Error() != "parsing: pattern not committed" {
 		t.Error("wrong error")
 	}
 }
@@ -103,7 +103,7 @@ pattern => {
 action => {
 		commit
 }`))
-	if err == nil || err.Error.Error() != "invalid stitch mode" {
+	if err == nil || err.Error.Error() != "parsing: invalid stitch mode" {
 		t.Error("wrong error")
 	}
 }
@@ -113,7 +113,7 @@ func TestUncommit(t *testing.T) {
 pattern => {
 	abc
 }`))
-	if err == nil || err.Error.Error() != "uncommitted pattern" {
+	if err == nil || err.Error.Error() != "parsing: uncommitted pattern" {
 		t.Error("wrong error")
 	}
 }
@@ -124,7 +124,7 @@ mode => {
 	xstitch
 	yy
 }`))
-	if err == nil || err.Error.Error() != "incorrect stitch mode setting" {
+	if err == nil || err.Error.Error() != "parsing: incorrect stitch mode setting" {
 		t.Error("wrong error")
 	}
 	_, err = internal.Parse([]byte(`
@@ -134,7 +134,7 @@ mode => {
 mode => {
 	topedge
 }`))
-	if err == nil || err.Error.Error() != "stitching not committed" {
+	if err == nil || err.Error.Error() != "parsing: stitching not committed" {
 		t.Error("wrong error")
 	}
 }
@@ -147,7 +147,7 @@ mode => {
 mode => {
 	xstitch
 }`))
-	if err == nil || err.Error.Error() != "no actions, nothing committed?" {
+	if err == nil || err.Error.Error() != "parsing: no actions, nothing committed?" {
 		t.Error("wrong error")
 	}
 }
@@ -156,20 +156,20 @@ func TestBadPalette(t *testing.T) {
 	_, err := internal.Parse([]byte(`palette => {
 	x => y => z
 }`))
-	if err == nil || err.Error.Error() != "invalid palette assignment" {
+	if err == nil || err.Error.Error() != "parsing: invalid palette assignment" {
 		t.Error("wrong error")
 	}
 	_, err = internal.Parse([]byte(`palette => {
 	xr => y
 }`))
-	if err == nil || err.Error.Error() != "only single characters allowed" {
+	if err == nil || err.Error.Error() != "parsing: only single characters allowed" {
 		t.Error("wrong error")
 	}
 	_, err = internal.Parse([]byte(`palette => {
 	x => y
 	x => z
 }`))
-	if err == nil || err.Error.Error() != "character re-used within palette" {
+	if err == nil || err.Error.Error() != "parsing: character re-used within palette" {
 		t.Error("wrong error")
 	}
 }
@@ -187,7 +187,7 @@ pattern => {
 action => {
 	commit
 }`))
-	if err == nil || err.Error.Error() != "symbol unknown" {
+	if err == nil || err.Error.Error() != "parsing: symbol unknown" {
 		t.Error("wrong error")
 	}
 }
@@ -245,14 +245,14 @@ offset => {
 	1
 	2
 }`))
-	if err == nil || err.Error.Error() != "invalid offset" {
+	if err == nil || err.Error.Error() != "parsing: invalid offset" {
 		t.Error("wrong error")
 	}
 	_, err = internal.Parse([]byte(`
 offset => {
 	12
 }`))
-	if err == nil || err.Error.Error() != "offset should be Width[x]Height" {
+	if err == nil || err.Error.Error() != "parsing: offset should be Width[x]Height" {
 		t.Error("wrong error")
 	}
 	_, err = internal.Parse([]byte(`
@@ -281,13 +281,13 @@ func TestSingleLineParserError(t *testing.T) {
 action => {
 	commit}
 `))
-	if err == nil || err.Error.Error() != "unclosed block" {
+	if err == nil || err.Error.Error() != "parsing: unclosed block at block: 1" {
 		t.Error("wrong error")
 	}
 	_, err = internal.Parse([]byte(`
 action => {action => {commit}
 `))
-	if err == nil || err.Error.Error() != "single-line start of block invalid" {
+	if err == nil || err.Error.Error() != "parsing: single-line start of block invalid" {
 		t.Error("wrong error")
 		t.Error(err.Error.Error())
 	}

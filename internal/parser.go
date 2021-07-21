@@ -21,6 +21,7 @@ type (
 		mode  string
 		err   error
 	}
+	// ParserError is an internal error associated with parsing patterns.
 	ParserError struct {
 		Error     error
 		Backtrace []string
@@ -40,9 +41,14 @@ const (
 	noColor          = "NONE"
 )
 
+// NewParsingError returns a new gxs error for parsing.
+func NewParsingError(message string) error {
+	return NewGXSError("parsing", message)
+}
+
 func next(stream []string) (patternBlock, int) {
 	idx := 0
-	inBlock := false
+	blockCount := 0
 	block := patternBlock{mode: defaultBlock}
 	for idx < len(stream) {
 		line := strings.TrimSpace(stream[idx])
@@ -50,17 +56,17 @@ func next(stream []string) (patternBlock, int) {
 			line = ""
 		}
 		if len(line) > 0 {
-			if inBlock {
+			if blockCount > 0 {
 				if line == "}" {
 					if len(block.lines) == 0 {
-						return patternBlock{err: fmt.Errorf("empty block found")}, 0
+						return patternBlock{err: NewParsingError("empty block found")}, 0
 					}
 					return block, idx + 1
 				}
 				block.lines = append(block.lines, line)
 			} else {
 				if strings.HasSuffix(line, parserBlockStart) {
-					inBlock = true
+					blockCount++
 					mode, err := getBlockMode(line)
 					if err != nil {
 						return patternBlock{err: err}, 0
@@ -73,22 +79,22 @@ func next(stream []string) (patternBlock, int) {
 						if len(parts) == 2 {
 							mode, err := getBlockMode(sub)
 							if err != nil {
-								return patternBlock{err: fmt.Errorf("unable to read single line block")}, 0
+								return patternBlock{err: NewParsingError("unable to read single line block")}, 0
 							}
 							block.mode = mode
 							block.lines = []string{parts[1]}
 							return block, 1
 						}
-						return patternBlock{err: fmt.Errorf("single-line start of block invalid")}, 0
+						return patternBlock{err: NewParsingError("single-line start of block invalid")}, 0
 					}
-					return patternBlock{err: fmt.Errorf("expected start of block")}, 0
+					return patternBlock{err: NewParsingError("expected start of block")}, 0
 				}
 			}
 		}
-		idx += 1
+		idx++
 	}
-	if inBlock {
-		return patternBlock{err: fmt.Errorf("unclosed block")}, 0
+	if blockCount > 0 {
+		return patternBlock{err: NewParsingError(fmt.Sprintf("unclosed block at block: %d", blockCount))}, 0
 	}
 	return block, idx
 }
@@ -96,7 +102,7 @@ func next(stream []string) (patternBlock, int) {
 func getBlockMode(line string) (string, error) {
 	modeSection := strings.Split(line, parserBlockStart)
 	if len(modeSection) != 2 {
-		return "", fmt.Errorf("invalid start block")
+		return "", NewParsingError("invalid start block")
 	}
 	return modeSection[0], nil
 }
@@ -106,7 +112,7 @@ func (b patternBlock) isMatch(is string) bool {
 }
 
 func (b patternBlock) toError(message string) *ParserError {
-	return &ParserError{Error: fmt.Errorf(message), Backtrace: b.lines}
+	return &ParserError{Error: NewParsingError(message), Backtrace: b.lines}
 }
 
 func parseBlocks(blocks []patternBlock) ([]patternAction, *ParserError) {
@@ -190,13 +196,13 @@ func parseBlocks(blocks []patternBlock) ([]patternAction, *ParserError) {
 		}
 	}
 	if len(action.pattern) != 0 {
-		return nil, &ParserError{Error: fmt.Errorf("uncommitted pattern")}
+		return nil, &ParserError{Error: NewParsingError("uncommitted pattern")}
 	}
 	return actions, nil
 }
 
 func (a patternAction) toPatternError(message string) *ParserError {
-	return &ParserError{Error: fmt.Errorf(message), Backtrace: a.pattern}
+	return &ParserError{Error: NewParsingError(message), Backtrace: a.pattern}
 }
 
 func buildPattern(actions []patternAction) (Pattern, *ParserError) {
@@ -262,7 +268,7 @@ func buildPattern(actions []patternAction) (Pattern, *ParserError) {
 			colorMapping = append(colorMapping, mapped)
 			continue
 		}
-		return pattern, &ParserError{Error: fmt.Errorf("unable to reverse map color")}
+		return pattern, &ParserError{Error: NewParsingError("unable to reverse map color")}
 	}
 	pattern.colors = colorMapping
 	pattern.entries = entries
@@ -299,18 +305,19 @@ func parseActions(b []byte) ([]patternAction, *ParserError) {
 		lines = newLines
 	}
 	if len(blocks) == 0 {
-		return nil, &ParserError{Error: fmt.Errorf("no blocks found")}
+		return nil, &ParserError{Error: NewParsingError("no blocks found")}
 	}
 	actions, pErr := parseBlocks(blocks)
 	if pErr != nil {
 		return nil, pErr
 	}
 	if len(actions) == 0 {
-		return nil, &ParserError{Error: fmt.Errorf("no actions, nothing committed?")}
+		return nil, &ParserError{Error: NewParsingError("no actions, nothing committed?")}
 	}
 	return actions, nil
 }
 
+// Parse handles parsing a pattern.
 func Parse(b []byte) (Pattern, *ParserError) {
 	actions, err := parseActions(b)
 	if err != nil {

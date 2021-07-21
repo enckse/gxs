@@ -36,10 +36,7 @@ func main() {
 	outMode := flag.String("format", internal.ASCIIMode, "output format")
 	option := &internal.Option{}
 	flag.Func("option", "gxs options", func(s string) error {
-		if err := option.Set(s); err != nil {
-			return err
-		}
-		return nil
+		return option.Set(s)
 	})
 	flag.Parse()
 	var b []byte

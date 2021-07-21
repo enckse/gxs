@@ -9,15 +9,15 @@ import (
 func TestSetInvalid(t *testing.T) {
 	o := &internal.Option{}
 	err := o.Set("a=x=y")
-	if err == nil || err.Error() != "invalid key=value pair" {
+	if err == nil || err.Error() != "options: invalid key=value pair" {
 		t.Error("is invalid")
 	}
 	err = o.Set("a=x")
-	if err == nil || err.Error() != "unknown option" {
+	if err == nil || err.Error() != "options: unknown option" {
 		t.Error("bad option")
 	}
 	err = o.Set("ascii-no-delimiter=abc")
-	if err == nil || err.Error() != "invalid boolean value" {
+	if err == nil || err.Error() != "options: invalid boolean value" {
 		t.Error("bad boolean")
 	}
 }
