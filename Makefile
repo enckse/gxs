@@ -1,6 +1,6 @@
 BIN      := bin/
 GXS      := $(BIN)gxs
-FLAGS    := -trimpath -buildmode=pie -mod=readonly -modcacherw
+FLAGS    := -ldflags "-X main.version=$(shell git log --format=%h -n 1)" -trimpath -buildmode=pie -mod=readonly -modcacherw
 CASES    := $(shell ls examples/*.gxs) $(shell ls tests/inputs/*.gxs)
 FORMATS  := html ascii
 EXPECT   := $(shell find tests/outputs -type f)

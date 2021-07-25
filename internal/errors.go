@@ -16,7 +16,7 @@ type (
 func NewGXSError(category, message string) error {
 	return &GXSError{
 		category: category,
-		message: message,
+		message:  message,
 	}
 }
 

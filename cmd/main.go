@@ -11,6 +11,10 @@ import (
 	"voidedtech.com/gxs/internal"
 )
 
+var (
+	version = "development"
+)
+
 func die(message string, err error) {
 	fmt.Fprintln(os.Stderr, message)
 	fmt.Fprintln(os.Stderr, err)
@@ -34,11 +38,16 @@ func main() {
 	file := flag.String("input", "", "file to take as an input pattern (else stdin)")
 	out := flag.String("output", "", "file to save output (else stdout)")
 	outMode := flag.String("format", internal.ASCIIMode, "output format")
+	showVers := flag.Bool("version", false, "display version")
 	option := &internal.Option{}
 	flag.Func("option", "gxs options", func(s string) error {
 		return option.Set(s)
 	})
 	flag.Parse()
+	if *showVers {
+		fmt.Printf("version: %s\n", version)
+		return
+	}
 	var b []byte
 	if fileName := *file; fileName == "" {
 		b = stdin()
