@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"bytes"
 	"flag"
 	"fmt"
@@ -9,29 +8,19 @@ import (
 	"os"
 
 	"voidedtech.com/gxs/internal"
+	"voidedtech.com/stock"
 )
 
 var (
 	version = "development"
 )
 
-func die(message string, err error) {
-	fmt.Fprintln(os.Stderr, message)
-	fmt.Fprintln(os.Stderr, err)
-	os.Exit(1)
-}
-
 func stdin() []byte {
-	scanner := bufio.NewScanner(os.Stdin)
-	var b bytes.Buffer
-	for scanner.Scan() {
-		b.WriteString(scanner.Text())
-		b.WriteString("\n")
+	b, err := stock.Stdin(false)
+	if err != nil {
+		stock.Die("failed to read stdin", err)
 	}
-	if err := scanner.Err(); err != nil {
-		die("failed to read stdin", err)
-	}
-	return b.Bytes()
+	return b
 }
 
 func main() {
@@ -54,7 +43,7 @@ func main() {
 	} else {
 		raw, err := os.ReadFile(fileName)
 		if err != nil {
-			die("unable to read file", err)
+			stock.Die("unable to read file", err)
 		}
 		b = raw
 	}
@@ -65,11 +54,11 @@ func main() {
 				fmt.Fprintln(os.Stderr, line)
 			}
 		}
-		die("unable to parse pattern", pErr.Error)
+		stock.Die("unable to parse pattern", pErr.Error)
 	}
 	tmpl, err := internal.Build(pattern, *outMode, option)
 	if err != nil {
-		die("failed to template", err)
+		stock.Die("failed to template", err)
 	}
 	var write io.Writer
 	outFile := *out
@@ -80,6 +69,6 @@ func main() {
 		write = &b
 	}
 	if _, err := write.Write(tmpl); err != nil {
-		die("failed to write output", err)
+		stock.Die("failed to write output", err)
 	}
 }
