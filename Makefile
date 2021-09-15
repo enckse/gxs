@@ -11,7 +11,7 @@ all: $(GXS) check
 
 check: test example options expect
 
-$(GXS): $(shell find cmd/ -type f) $(shell find internal/ -type f)
+$(GXS): cmd/* internal/* go.*
 	go build -o $(GXS) $(FLAGS) cmd/main.go
 
 test:
