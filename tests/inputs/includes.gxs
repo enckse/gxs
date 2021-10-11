@@ -1,4 +1,4 @@
 include => {
-    tests/inputs/include.one
-    tests/inputs/include.two
+    inputs/include.one
+    inputs/include.two
 }
