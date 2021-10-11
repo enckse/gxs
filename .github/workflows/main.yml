@@ -21,4 +21,7 @@ jobs:
       - name: "ninja"
         working-directory: build
         run: ninja
+      - name: "test"
+        working-directory: build
+        run: ninja test
 
