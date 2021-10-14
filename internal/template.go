@@ -7,6 +7,8 @@ import (
 	"html/template"
 	"sort"
 	"strings"
+
+	"voidedtech.com/stock"
 )
 
 const (
@@ -85,7 +87,7 @@ type (
 
 // NewTemplateError creates a new templating error.
 func NewTemplateError(message string) error {
-	return NewGXSError("template", message)
+	return stock.NewBasicCategoryError("template", message)
 }
 
 // NewPattern creates a new, initialized pattern.

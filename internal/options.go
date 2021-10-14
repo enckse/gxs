@@ -2,6 +2,8 @@ package internal
 
 import (
 	"strings"
+
+	"voidedtech.com/stock"
 )
 
 type (
@@ -28,7 +30,7 @@ func toBool(s string) (bool, error) {
 
 // NewOptionsError will create a new options-based error.
 func NewOptionsError(message string) error {
-	return NewGXSError("options", message)
+	return stock.NewBasicCategoryError("options", message)
 }
 
 // Set will set a CLI key=value property.

@@ -5,6 +5,8 @@ import (
 	"os"
 	"strconv"
 	"strings"
+
+	"voidedtech.com/stock"
 )
 
 type (
@@ -43,7 +45,7 @@ const (
 
 // NewParsingError returns a new gxs error for parsing.
 func NewParsingError(message string) error {
-	return NewGXSError("parsing", message)
+	return stock.NewBasicCategoryError("parsing", message)
 }
 
 func next(stream []string) (patternBlock, int) {
